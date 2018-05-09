@@ -1,0 +1,18 @@
+psql
+        ^
+vagrant=# SELECT * FROM pg_database WHERE datname = 'solar';
+vagrant=# UPDATE pg_database SET datallowconn = 'false' WHERE datname = 'solar';
+UPDATE 1
+vagrant=# ALTER DATABASE solar CONNECTION LIMIT 1;
+ALTER DATABASE
+vagrant=# SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'solar';
+ pg_terminate_backend
+----------------------
+ t
+ t
+ t
+ t
+(4 rows)
+
+vagrant=# DROP DATABASE solar;
+
