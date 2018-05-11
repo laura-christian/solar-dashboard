@@ -1,240 +1,151 @@
 """Movie Ratings."""
 
 from jinja2 import StrictUndefined
-
-from flask import Flask, render_template, request, flash, redirect, session
+from sqlalchemy import func
+from flask import Flask, render_template, request, flash, redirect, session, jsonify, g
 from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db, db, Geolocation, SolarOutput, Cloudcover
+import helper
+from datetime import datetime, date, time, timedelta, tzinfo
+import pytz
 
-
+# Create Flask application
 app = Flask(__name__)
 
 # Required to use Flask sessions and the debug toolbar
 app.secret_key = "adlkfj123fdn394a"
 
-# Normally, if you use an undefined variable in Jinja2, it fails silently.
-# This is horrible. Fix this so that, instead, it raises an error.
+# Cause Jinja to fail loudly, so errors are caught
 app.jinja_env.undefined = StrictUndefined
+
+
+JS_TESTING_MODE = False
+
+
+@app.before_request
+def add_tests():
+
+    g.jasmine_tests = JS_TESTING_MODE
 
 
 @app.route('/')
 def index():
-    """Homepage."""
+    """Render homepage."""
 
-    return render_template("homepage.html")
+    return render_template("index.html")
 
 
-# @app.route('/register', methods=['GET'])
-# def register_form():
-#     """Show form for user signup."""
+@app.route("/solaroutput_single_day.json")
+def get_bar_graph_data_single_day():
+    """Aggregate solar output data for a single day"""
 
-#     return render_template("register_form.html")
+    timeframe=request.args.get('timeframe')
 
+    if timeframe == 'today':
 
-# @app.route('/register', methods=['POST'])
-# def register_process():
-#     """Process registration."""
+        start_date = helper.get_today_local()
+        end_date = today + timedelta(days=1)
 
-#     # Get form variables
-#     email = request.form["email"]
-#     password = request.form["password"]
-#     age = int(request.form["age"])
-#     zipcode = request.form["zipcode"]
 
-#     new_user = User(email=email, password=password, age=age, zipcode=zipcode)
+    elif timeframe == 'yesterday':
+             
+        start_date = helper.get_yesterday_local()
+        end_date = helper.get_today_local()
 
-#     db.session.add(new_user)
-#     db.session.commit()
+    # Create subquery object to capture all kWh values b/w day selected and following day (midnight)
+    subq = db.session.query(SolarOutput.dt_local, SolarOutput.kWh).\
+        filter(SolarOutput.dt_local>=start_date, SolarOutput.dt_local<end_date).subquery()
+    # In turn perform group-by query on subquery to sum values for each hour, and filter out any hours
+        #in which no solar energy was produced
+    q = db.session.query(func.date_trunc('hour', subq.c.dt_local),func.sum(subq.c.kWh)).\
+        group_by(func.date_trunc('hour', subq.c.dt_local)).having(func.sum(subq.c.kWh)>0).\
+        order_by(func.date_trunc('hour',subq.c.dt_local)).all()
 
-#     flash("User {} added.".format(email))
-#     return redirect("/users/{}".format(new_user.user_id))
+    # Iterate over query results to get labels and data for bar chart and totals for emissions equivalent tiles
+    labels = []
+    data = []
+    for dt, kWh in q:
+        dt += timedelta(hours=1) #Adding an hour so that kWh sums reflect totals at top of *next* hour
+        labels.append(dt.strftime('%-I %p')) # Convert to string reflecting local time
+        data.append(kWh)
+    total_kWh = sum(data)
 
 
-# @app.route('/login', methods=['GET'])
-# def login_form():
-#     """Show login form."""
+    return jsonify({'labels': labels, 'data': data, 'total_kWh': total_kWh})
 
-#     return render_template("login_form.html")
+@app.route("/solaroutput_range_days.json")
+def get_bar_graph_data_range_days():
+    """Aggregate solar output data for a single day"""
 
+    timeframe=request.args.get('timeframe')
 
-# @app.route('/login', methods=['POST'])
-# def login_process():
-#     """Process login."""
+    if timeframe == 'last_seven_days':
 
-#     # Get form variables
-#     email = request.form["email"]
-#     password = request.form["password"]
+        start_date = helper.get_seven_days_ago()
+        end_date = helper.get_today_local() + timedelta(days=1)
 
-#     user = User.query.filter_by(email=email).first()
+    elif timeframe == 'this_month':
+             
+        start_date = helper.get_first_day_this_month()
+        end_date = helper.get_today_local() + timedelta(days=1)
 
-#     if not user:
-#         flash("No such user")
-#         return redirect("/login")
+    elif timeframe == 'last_month':
 
-#     if user.password != password:
-#         flash("Incorrect password")
-#         return redirect("/login")
+        start_date = helper.get_first_day_last_month()
+        end_date = helper.get_first_day_this_month()
 
-#     session["user_id"] = user.user_id
+    # Create subquery object to capture all kWh values for range of days selected
+    subq = db.session.query(SolarOutput.dt_local, SolarOutput.kWh).\
+        filter(SolarOutput.dt_local>=start_date, SolarOutput.dt_local<end_date).subquery()
+    # In turn perform group-by query on subquery to sum values for each day
+    q = db.session.query(func.date_trunc('day', subq.c.dt_local),func.sum(subq.c.kWh)).\
+        group_by(func.date_trunc('day', subq.c.dt_local)).order_by(func.date_trunc('day',subq.c.dt_local)).all()
 
-#     flash("Logged in")
-#     return redirect("/users/{}".format(user.user_id))
+    # Iterate over query results to get labels and data for bar chart and totals for emissions equivalent tiles
+    labels = []
+    data = []
+    for dt, kWh in q:
+        labels.append(dt.strftime('%-m/%-d')) # Convert to string reflecting local date
+        data.append(kWh)
+    total_kWh = sum(data)
 
 
-# @app.route('/logout')
-# def logout():
-#     """Log out."""
+    return jsonify({'labels': labels, 'data': data, 'total_kWh': total_kWh})
 
-#     del session["user_id"]
-#     flash("Logged Out.")
-#     return redirect("/")
+@app.route("/solaroutput_by_month.json")
+def get_bar_graph_data_by_month():
+    """Aggregate solar output data for a single day"""
 
+    timeframe=request.args.get('timeframe')
 
-# @app.route("/users")
-# def user_list():
-#     """Show list of users."""
+    if timeframe == 'this_year':
 
-#     users = User.query.all()
-#     return render_template("user_list.html", users=users)
+        start_date = helper.get_first_this_year()
+        end_date = helper.get_today_local() + timedelta(days=1)
 
+    elif timeframe == 'last_year':
+             
+        start_date = helper.get_first_last_year()
+        end_date = helper.get_first_this_year()
 
-# @app.route("/users/<int:user_id>")
-# def user_detail(user_id):
-#     """Show info about user."""
+    # Create subquery object to capture all kWh values for range of days selected
+    subq = db.session.query(SolarOutput.dt_local, SolarOutput.kWh).\
+        filter(SolarOutput.dt_local>=start_date, SolarOutput.dt_local<end_date).subquery()
+    # In turn perform group-by query on subquery to sum values for each month
+    q = db.session.query(func.date_trunc('month', subq.c.dt_local),func.sum(subq.c.kWh)).\
+        group_by(func.date_trunc('month', subq.c.dt_local)).order_by(func.date_trunc('month',subq.c.dt_local)).all()
 
-#     user = User.query.options(db.joinedload('ratings').joinedload('movie')).get(user_id)
-#     return render_template("user.html", user=user)
+    # Iterate over query results to get labels and data for bar chart and totals for emissions equivalent tiles
+    labels = []
+    data = []
+    for dt, kWh in q:
+        labels.append(dt.strftime('%b')) #Convert to abbreviation for month
+        data.append(kWh)
+    total_kWh = sum(data)
 
 
-# @app.route("/movies")
-# def movie_list():
-#     """Show list of movies."""
+    return jsonify({'labels': labels, 'data': data, 'total_kWh': total_kWh})
 
-#     movies = Movie.query.order_by('title').all()
-#     return render_template("movie_list.html", movies=movies)
-
-
-# @app.route("/movies/<int:movie_id>", methods=['GET'])
-# def movie_detail(movie_id):
-#     """Show info about movie.
-
-#     If a user is logged in, let them add/edit a rating.
-#     """
-
-#     movie = Movie.query.get(movie_id)
-
-#     user_id = session.get("user_id")
-
-#     if user_id:
-#         user_rating = Rating.query.filter_by(
-#             movie_id=movie_id, user_id=user_id).first()
-
-#     else:
-#         user_rating = None
-
-#     # Get average rating of movie
-
-#     rating_scores = [r.score for r in movie.ratings]
-#     avg_rating = float(sum(rating_scores)) / len(rating_scores)
-
-#     prediction = None
-
-#     # Prediction code: only predict if the user hasn't rated it.
-
-#     if (not user_rating) and user_id:
-#         user = User.query.get(user_id)
-#         if user:
-#             prediction = user.predict_rating(movie)
-
-#     # Either use the prediction or their real rating
-
-#     if prediction:
-#         # User hasn't scored; use our prediction if we made one
-#         effective_rating = prediction
-
-#     elif user_rating:
-#         # User has already scored for real; use that
-#         effective_rating = user_rating.score
-
-#     else:
-#         # User hasn't scored, and we couldn't get a prediction
-#         effective_rating = None
-
-#     # Get the eye's rating, either by predicting or using real rating
-
-#     the_eye = User.query.filter_by(email="the-eye@of-judgment.com").one()
-#     eye_rating = Rating.query.filter_by(
-#         user_id=the_eye.user_id, movie_id=movie.movie_id).first()
-
-#     if eye_rating is None:
-#         eye_rating = the_eye.predict_rating(movie)
-
-#     else:
-#         eye_rating = eye_rating.score
-
-#     if eye_rating and effective_rating:
-#         difference = abs(eye_rating - effective_rating)
-
-#     else:
-#         # We couldn't get an eye rating, so we'll skip difference
-#         difference = None
-
-#     # Depending on how different we are from the Eye, choose a message
-
-#     BERATEMENT_MESSAGES = [
-#         "I suppose you don't have such bad taste after all.",
-#         "I regret every decision that I've ever made that has brought me" +
-#             " to listen to your opinion.",
-#         "Words fail me, as your taste in movies has clearly failed you.",
-#         "Did you watch this movie in an alternate universe where your taste doesn't suck?",
-#         "Words cannot express the awfulness of your taste."
-#     ]
-
-#     if difference:
-#         beratement = BERATEMENT_MESSAGES[int(difference)]
-
-#     else:
-#         beratement = None
-
-#     return render_template(
-#         "movie.html",
-#         movie=movie,
-#         user_rating=user_rating,
-#         average=avg_rating,
-#         prediction=prediction,
-#         eye_rating=eye_rating,
-#         difference=difference,
-#         beratement=beratement
-#         )
-
-
-# @app.route("/movies/<int:movie_id>", methods=['POST'])
-# def movie_detail_process(movie_id):
-#     """Add/edit a rating."""
-
-#     # Get form variables
-#     score = int(request.form["score"])
-
-#     user_id = session.get("user_id")
-#     if not user_id:
-#         raise Exception("No user logged in.")
-
-#     # Check for an existing rating
-#     rating = Rating.query.filter_by(user_id=user_id, movie_id=movie_id).first()
-
-#     # Update an existing rating or if there isn't one yet, create one.
-#     if rating:
-#         rating.score = score
-#         flash("Rating updated.")
-
-#     else:
-#         rating = Rating(user_id=user_id, movie_id=movie_id, score=score)
-#         flash("Rating added.")
-#         db.session.add(rating)
-
-#     db.session.commit()
-
-#     return redirect("/movies/{}".format(movie_id))
 
 
 if __name__ == "__main__":

@@ -1,7 +1,9 @@
 """Models and database functions for Ratings project."""
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from datetime import datetime, date, time, timedelta, tzinfo
 import pytz
+import helper
 
 # This is the connection to the PostgreSQL database; we're getting this through
 # the Flask-SQLAlchemy helper library. On this, we can find the `session`
@@ -30,7 +32,8 @@ class Geolocation(db.Model):
     def __repr__(self):
         """Provides helpful representation of object when printed."""
 
-        return "<Location address={} latitude={} longitude={}>".format(self.address, self.latitude, self.longitude)
+        return "<Location street address={} city= {} state={} latitude={} longitude={}>".format(self.street_addr, 
+                    self.city, self.state, self.latitude, self.longitude)
 
 
 class SolarOutput(db.Model):
@@ -40,7 +43,7 @@ class SolarOutput(db.Model):
 
     output_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     dt_local = db.Column(db.DateTime, nullable=False)
-    kWh = db.Column(db.Float, nullable=False)
+    kWh = db.Column(db.Float, nullable=False, default=0)
 
     def __repr__(self):
         """Provides helpful representation of object when printed."""
@@ -56,10 +59,6 @@ class Cloudcover(db.Model):
     local_date = db.Column(db.DateTime, nullable=False) #This will be a naive date
     epoch_time = db.Column(db.Integer, nullable=False)
     cloudcover = db.Column(db.Float, nullable=False) # Expressed as percentage
-
-    def avg_cloudcov_daylight_hrs(percentages):
-
-        return avg_cloudcov
 
     def __repr__(self):
         """Provides helpful representation of object when printed."""

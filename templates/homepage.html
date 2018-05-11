@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+
+   
+    <div class="row-fluid">
+        <div id="about"></div>
+        <div id="chart"></div>
+        <div id="info-box"></div>
+    </div>
+
+    <script src='https://code.jquery.com/jquery.js'></script>
+    <script src="//d3js.org/d3.v3.min.js"></script>
+    <script src="static/js/BundleChart.js"></script>
+    <script src="/static/js/BarChart.js"></script>
+    <script src="/static/js/About.js"></script>
+    <script src="/static/js/Main.js"></script>
+
+    {% if g.jasmine_tests %}
+        <!-- stuff for testing -->
+        <link rel="stylesheet" href="/static/css/jasmine.min.css">
+        <script src="/static/js/jasmine.min.js"></script>
+        <script src="/static/js/jasmine-html.min.js"></script>
+        <script src="/static/js/boot.min.js"></script>
+        <script src="/static/js/BundleChartSpec.js"></script>
+        <!-- end of stuff for testing -->
+    {% endif %}
+
+{% endblock %}
