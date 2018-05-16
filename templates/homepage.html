@@ -1,28 +1,260 @@
-{% extends 'base.html' %}
+{% extends "base_site.html" %}
+
+{% block title %} {{ super() }} {% endblock title %}
+
+{% block stylesheets %}
+  {{ super() }}
+{% endblock stylesheets %}
+
 {% block content %}
+<div class="right_col" role="main">
+    <div class="">
+      <div class="row top_tiles">
+        <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-6">
+          <div class="tile-stats">
+            <div class="icon"><i class="fas fa-leaf" style="width: 60px; height: 60px"></i></div>
+            <div id="trees-planted" class="count">2</div>
+            <h3>Trees</h3>
+            <h3>Planted</h3>
+          </div>
+        </div>
+        <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-6">
+          <div class="tile-stats">
+            <div class="icon"><i class="fas fa-car" style="width: 60px; height: 60px"></i></div>
+            <div id="miles-driven" class="count">102</div>
+            <h3>Miles</h3>
+            <h3>Driven</h3>
+          </div>
+        </div>
+        <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-6">
+          <div class="tile-stats">
+            <div class="icon"><i class="fas fa-cloud" style="width: 60px; height: 60px"></i></div>
+            <div id="gallons-gas" class="count">4</div>
+            <h3>Gallons of</h3>
+            <h3>Gas Consumed</h3>
+          </div>
+        </div>
+        <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-6">
+          <div class="tile-stats">
+            <div class="icon"><i class="fas fa-fire" style="width: 60px; height: 60px"></i></div>
+            <div id="pounds-coal" class="count">2</div>
+            <h3>Pounds of</h3>
+            <h3>Coal Burned</h3>
+          </div>
+        </div>
+      </div>
+      <div class="clearfix"></div>
 
-   
-    <div class="row-fluid">
-        <div id="about"></div>
-        <div id="chart"></div>
-        <div id="info-box"></div>
-    </div>
+      <!-- start of kWh bar chart -->
+      <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title">
+              <h2>kWh Produced</h2>
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+              <canvas id="kWhBarChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- end of kWh bar chart -->
 
-    <script src='https://code.jquery.com/jquery.js'></script>
-    <script src="//d3js.org/d3.v3.min.js"></script>
-    <script src="static/js/BundleChart.js"></script>
-    <script src="/static/js/BarChart.js"></script>
-    <script src="/static/js/About.js"></script>
-    <script src="/static/js/Main.js"></script>
+      <div class="clearfix"></div>
 
-    {% if g.jasmine_tests %}
-        <!-- stuff for testing -->
-        <link rel="stylesheet" href="/static/css/jasmine.min.css">
-        <script src="/static/js/jasmine.min.js"></script>
-        <script src="/static/js/jasmine-html.min.js"></script>
-        <script src="/static/js/boot.min.js"></script>
-        <script src="/static/js/BundleChartSpec.js"></script>
-        <!-- end of stuff for testing -->
-    {% endif %}
+      <!-- start of weather widget -->
+      <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="x_panel">
+          <div class="x_title">
+            <h2>Weather</h2>
+            <div class="clearfix"></div>
+          </div>
+          <div class="x_content">
+            <div class="row">
+              <div class="col-sm-12">
+                <div class="temperature"><b>Monday</b>, 07:30 AM<br><br>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-4">
+                <div class="weather-icon">
+                  <span>
+                                      <canvas height="78" width="78" id="partly-cloudy-day"></canvas>
+                                  </span>
 
-{% endblock %}
+                </div>
+              </div>
+              <div class="col-sm-8">
+                <div class="weather-text">
+                  <h2  style="font-size: 14pt">Oakland
+                                      <br><i>Partly Cloudy Day</i>
+                                  </h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-12">
+              <div class="weather-text pull-right">
+                <h3 class="degrees">23</h3>
+              </div>
+            </div>
+            <div class="clearfix"></div>
+
+
+            <div class="row weather-days">
+              <div class="col-sm-2">
+                <div class="daily-weather">
+                  <h2 class="day">Mon</h2>
+                  <h3 class="degrees">25</h3>
+                  <span>
+                  <canvas id="clear-day" width="32" height="32">
+                                          </canvas>
+
+                                  </span>
+                  <h5>15
+                                      <i>km/h</i>
+                                  </h5>
+                </div>
+              </div>
+              <div class="col-sm-2">
+                <div class="daily-weather">
+                  <h2 class="day">Tue</h2>
+                  <h3 class="degrees">25</h3>
+                  <canvas height="32" width="32" id="rain"></canvas>
+                  <h5>12
+                                      <i>km/h</i>
+                                  </h5>
+                </div>
+              </div>
+              <div class="col-sm-2">
+                <div class="daily-weather">
+                  <h2 class="day">Wed</h2>
+                  <h3 class="degrees">27</h3>
+                  <canvas height="32" width="32" id="snow"></canvas>
+                  <h5>14
+                                      <i>km/h</i>
+                                  </h5>
+                </div>
+              </div>
+              <div class="col-sm-2">
+                <div class="daily-weather">
+                  <h2 class="day">Thu</h2>
+                  <h3 class="degrees">28</h3>
+                  <canvas height="32" width="32" id="sleet"></canvas>
+                  <h5>15
+                                      <i>km/h</i>
+                                  </h5>
+                </div>
+              </div>
+              <div class="col-sm-2">
+                <div class="daily-weather">
+                  <h2 class="day">Fri</h2>
+                  <h3 class="degrees">28</h3>
+                  <canvas height="32" width="32" id="wind"></canvas>
+                  <h5>11
+                                      <i>km/h</i>
+                                  </h5>
+                </div>
+              </div>
+              <div class="col-sm-2">
+                <div class="daily-weather">
+                  <h2 class="day">Sat</h2>
+                  <h3 class="degrees">26</h3>
+                  <canvas height="32" width="32" id="cloudy"></canvas>
+                  <h5>10
+                                      <i>km/h</i>
+                                  </h5>
+                </div>
+              </div>
+              <div class="clearfix"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- end of weather widget -->
+
+      <!-- beginning cloudcover chart -->
+      <!-- <div class="row"> -->
+        <div class="col-md-4 col-sm-6 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title">
+              <h2>Avg Cloudcover</h2>
+              <ul class="nav navbar-right panel_toolbox">
+<!--                 <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                </li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a href="#">Settings 1</a>
+                    </li>
+                    <li><a href="#">Settings 2</a>
+                    </li>
+                  </ul>
+                </li>
+                <li><a class="close-link"><i class="fa fa-close"></i></a>
+                </li> -->
+              </ul>
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+              <canvas id="lineChart"></canvas>
+            </div>
+          </div>
+        </div>
+      <!-- beginning cloudcover chart -->
+
+      <!-- beginning sunstats guage -->
+      <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="x_panel fixed_height_320">
+          <div class="x_title">
+            <h2>Solar Path</h2>
+            <ul class="nav navbar-right panel_toolbox">
+<!--               <li><a class="collapse-link"><i class="fas fa-chevron-up"></i></a>
+              </li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fas fa-wrench"></i></a>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a href="#">Settings 1</a>
+                  </li>
+                  <li><a href="#">Settings 2</a>
+                  </li>
+                </ul>
+              </li>
+              <li><a class="close-link"><i class="fas fa-close"></i></a>
+              </li> -->
+            </ul>
+            <div class="clearfix"></div>
+          </div>
+          <div class="x_content">
+            <div class="dashboard-widget-content">
+              <ul class="quick-list">
+                <li>Sunrise: </li>
+                <li>Sunset: </li>
+                <li>Number of hours daylight: </li>
+                <li>Solar zenith: </li>
+                <li>Time at solar zenith: </li>
+              </ul>
+
+              <div class="sidebar-widget">
+                <h4>Solar Elevation (Now)</h4>
+                <canvas width="150" height="80" id="chart_gauge_01" class="" style="width: 160px; height: 100px;"></canvas>
+                <div class="goal-wrapper">
+                  <span id="gauge-text" class="gauge-value gauge-chart pull-left">0</span>
+                  <span class="gauge-value pull-left">&#176;</span>
+                  <span id="goal-text" class="goal-value pull-right">180&#176;</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- end sunstats guage -->
+
+{% endblock content %}
+
+{% block javascripts %}
+  {{ super()}}
+{% endblock javascripts %}
+

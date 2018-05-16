@@ -19,19 +19,19 @@ def generate_date_range(start_date, num_days):
 	return [start_date + timedelta(days=x) for x in range(num_days)]
 
 
-def convert_local_time_to_utc(dtobj, localtz):
+def convert_naive_local_time_to_utc(dtobj, localtz):
 	"""Converts 'naive' or non-timezone-aware date object, localizes and then returns as timezone-aware utc datetime object"""
 
-	naive = dtobj
-	local_dt = localtz.localize(naive)
+	local_dt = localtz.localize(dtobj)
 	utc_dt = local_dt.astimezone(pytz.utc)
 	
 	return local_dt.astimezone(pytz.utc) 
 
-def convert_local_time_to_epoch(utc_dtobj):
+def convert_utc_to_epoch(utc_dtobj):
 	"""Converts timezone-aware utc date object to seconds since epoch as integer"""
 
-	naive_utc = utc_dt.replace(tzinfo=None)
+	epoch = datetime.fromtimestamp(0)
+	utc_unaware = utc_dtobj.replace(tzinfo=None)
 
 	return int((utc_unaware - epoch).total_seconds())
 
@@ -76,22 +76,3 @@ def get_first_last_year():
 
 	return today.replace(year=last_year, month=1, day=1)
 
-######################################EPA Greenhouse Gas Equivalents##############################################
-
-"""The below calculator functions are based on equivalency estimates published by the EPA"""
-
-def trees_planted(kWh):
-
-	return kWh*.019
-
-def miles_driven(kWh):
-
-	return kWh*1.8
-
-def gallons_gasoline_consumed(kWh):
-
-	return kWh*.084
-
-def pounds_of_coal_burned(kWh):
-
-	return kWh*.814

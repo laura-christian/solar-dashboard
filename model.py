@@ -1,13 +1,10 @@
-"""Models and database functions for Ratings project."""
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 from datetime import datetime, date, time, timedelta, tzinfo
 import pytz
 import helper
 
-# This is the connection to the PostgreSQL database; we're getting this through
-# the Flask-SQLAlchemy helper library. On this, we can find the `session`
-# object, where we do most of our interactions (like committing, etc.)
+
 
 db = SQLAlchemy()
 
@@ -63,7 +60,7 @@ class Cloudcover(db.Model):
     def __repr__(self):
         """Provides helpful representation of object when printed."""
 
-        return "<Cloudcover epoch time={} percent cloudcover={}>".format(self.epoch_time, self.cloudcover)
+        return "<Cloudcover cloudiness_id={} epoch time={} percent cloudcover={}>".format(self.cloudiness_id, self.epoch_time, self.cloudcover)
 
 
 ##############################################################################

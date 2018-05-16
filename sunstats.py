@@ -1,7 +1,7 @@
-sunfrom astral import Astral, Location
+from astral import Astral, Location
 from datetime import datetime, date, timedelta, tzinfo
 import pytz
-import helperfuncs
+import helper
 
 
 a = Astral()
@@ -18,8 +18,8 @@ l.elevation = 125
 l.sun()
 
 
-today = helperfuncs.get_today_local()
-yesterday = helperfuncs.get_yesterday_local()
+today = helper.get_today_local()
+yesterday = helper.get_yesterday_local()
 
 def sun_single_day(date):
 	"""Returns tuple of datetime objects and numerical values for solar patterns on a single day"""
