@@ -30,6 +30,7 @@ def sun_single_day(date):
 	day_length = l.sunset()-l.sunrise()
 	solar_noon = l.solar_noon()
 	solar_zenith = l.solar_elevation(l.solar_noon().replace(tzinfo=None))
+	solar_elevation_now = l.solar_elevation(datetime.now())
 
 	return (sunrise, sunset, day_length, solar_noon, solar_zenith)
 

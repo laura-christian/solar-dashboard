@@ -105,7 +105,7 @@ def load_cloudcover_data(date_range):
 def load_solardata():
     """Load solar output data from csv file."""
 
-    with open("data/Data_Extract_20160314-20180509.csv", "rb") as f:
+    with open("data/Data_Extract_20180508-20180514.csv", "rb") as f:
         
         reader = csv.reader(f, delimiter=",")
 

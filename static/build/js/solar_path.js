@@ -32,8 +32,8 @@ function renderBarGraph(results) {
 }
 
 
-function getBarGraphData() {
-    $.get('/solaroutput.json', {'timeframe': 'last_year'}, renderBarGraph);
+function getSolarPathData() {
+    $.get('/solaroutput.json', {'timeframe': 'today'}, renderBarGraph);
     console.log("AJAX call sent");
 }
 

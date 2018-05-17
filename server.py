@@ -6,7 +6,9 @@ from flask import Flask, render_template, request, flash, redirect, session, jso
 from flask_debugtoolbar import DebugToolbarExtension
 from os.path import abspath, dirname, join, pardir
 import sys
+import os
 from model import connect_to_db, db, Geolocation, SolarOutput, Cloudcover
+import requests
 import sunstats
 import helper
 from datetime import datetime, date, time, timedelta, tzinfo
@@ -128,7 +130,32 @@ def get_bar_graph_data():
 
     return jsonify({'labels': labels, 'data': data, 'total_kWh': total_kWh})
 
+@app.route("/solarpath.json")
+def get_solar_path_data():
+    """Get data relevant to solar path above site for predefined periods of time"""
 
+    timeframe=request.args.get('timeframe')
+
+
+    return jsonify()
+
+@app.route("/weather.json")
+def get_weather_forecast():
+    """Get current local weather conditions plus forecast from DarkSky API"""
+
+    DARKSKY_TOKEN=os.environ.get('DARKSKY_TOKEN')[:-1]
+
+    url = "https://api.darksky.net/forecast/{token}/{lat},{long}".format(token=DARKSKY_TOKEN, lat=37.8195, long=-122.2523)
+    response = requests.get(url)
+    print "API polled"
+    data = response.json()
+    print "Data returned"
+
+    if response.ok:
+        current_conditions = data['currently']
+        forecast_conditions = data['daily']['data'][1:]
+
+    return jsonify({'current': current_conditions, 'forecast': forecast_conditions})
 
 
 if __name__ == "__main__":
