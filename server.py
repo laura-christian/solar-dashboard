@@ -10,6 +10,7 @@ import os
 from model import connect_to_db, db, Geolocation, SolarOutput, Cloudcover
 import requests
 import sunstats
+from astral import Astral, Location
 import helper
 from datetime import datetime, date, time, timedelta, tzinfo
 import pytz
@@ -134,10 +135,31 @@ def get_bar_graph_data():
 def get_solar_path_data():
     """Get data relevant to solar path above site for predefined periods of time"""
 
+    a = Astral()
+    a.solar_depression = 'civil'
+
+    l = Location()
+    l.latitude = 37.8195
+    l.longitude = -122.2523
+    l.timezone = 'US/Pacific'
+    l.elevation = 125
+
     timeframe=request.args.get('timeframe')
 
+    if timeframe == 'today':
+        sunrise = l.sunrise().strftime('%-I:%M%p')
+        sunset = l.sunset().strftime('%-I:%M%p')
+        day_length = str(l.sunset()-l.sunrise())
+        solar_noon = l.solar_noon().strftime('%-I:%M%p')
+        solar_zenith = l.solar_elevation(l.solar_noon().replace(tzinfo=None))
+        solar_elevation = l.solar_elevation()
+        solar_path_data = {'sunrise': sunrise, 'sunset': sunset, 'daylength': day_length, 'solar_noon': solar_noon, 'zenith': solar_zenith, 'elevation': solar_elevation}
 
-    return jsonify()
+    elif timeframe == 'yesterday':
+        yesterday = helper.get_yesterday_local()
+        solar_path_data = sunstats.sun_single_day(yesterday)
+
+    return jsonify(solar_path_data)
 
 @app.route("/weather.json")
 def get_weather_forecast():
@@ -147,9 +169,7 @@ def get_weather_forecast():
 
     url = "https://api.darksky.net/forecast/{token}/{lat},{long}".format(token=DARKSKY_TOKEN, lat=37.8195, long=-122.2523)
     response = requests.get(url)
-    print "API polled"
     data = response.json()
-    print "Data returned"
 
     if response.ok:
         current_conditions = data['currently']

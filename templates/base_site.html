@@ -106,19 +106,9 @@
         {% endblock %}
         <!-- Custom Theme Scripts -->
         <script src="{{ url_for('static', filename='build/js/custom.js') }}"></script>
-        <script src="{{ url_for('static', filename='build/js/kwh_bar_chart.js') }}"></script>
+        <script src="{{ url_for('static', filename='build/js/kwh_data.js') }}"></script>
         <script src="{{ url_for('static', filename='build/js/weather_widget.js') }}"></script>
-        <script type="text/javascript">
-        let weatherIcons = new Skycons({"color": "#73879C"});
-        weatherIcons.set("main-weather-icon", Skycons.PARTLY_CLOUDY_NIGHT);
-        weatherIcons.set("icon-day1", Skycons.PARTLY_CLOUDY_DAY);
-        weatherIcons.set("icon-day2", Skycons.CLEAR_DAY);
-        weatherIcons.set("icon-day3", Skycons.CLEAR_NIGHT);
-        weatherIcons.set("icon-day4", Skycons.RAIN)
-        weatherIcons.set("icon-day5", Skycons.SNOW);
-        weatherIcons.set("icon-day6", Skycons.WIND);
-        weatherIcons.play();
-        </script>
+        <script src="{{ url_for('static', filename='build/js/solar_path.js') }}"></script>
     {% endblock body %}
   </body>
 </html>

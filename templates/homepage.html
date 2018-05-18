@@ -10,44 +10,11 @@
 <div class="right_col" role="main">
     <div class="">
       <div class="row top_tiles">
-        <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-6">
-          <div class="tile-stats">
-            <div class="icon"><i class="fas fa-leaf" style="width: 60px; height: 60px"></i></div>
-            <div id="trees-planted" class="count">2</div>
-            <h3>Trees</h3>
-            <h3>Planted</h3>
-          </div>
-        </div>
-        <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-6">
-          <div class="tile-stats">
-            <div class="icon"><i class="fas fa-car" style="width: 60px; height: 60px"></i></div>
-            <div id="miles-driven" class="count">102</div>
-            <h3>Miles</h3>
-            <h3>Driven</h3>
-          </div>
-        </div>
-        <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-6">
-          <div class="tile-stats">
-            <div class="icon"><i class="fas fa-cloud" style="width: 60px; height: 60px"></i></div>
-            <div id="gallons-gas" class="count">4</div>
-            <h3>Gallons of</h3>
-            <h3>Gas Consumed</h3>
-          </div>
-        </div>
-        <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-6">
-          <div class="tile-stats">
-            <div class="icon"><i class="fas fa-fire" style="width: 60px; height: 60px"></i></div>
-            <div id="pounds-coal" class="count">2</div>
-            <h3>Pounds of</h3>
-            <h3>Coal Burned</h3>
-          </div>
-        </div>
-      </div>
       <div class="clearfix"></div>
 
       <!-- start of kWh bar chart -->
       <div class="row">
-        <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="col-md-8 col-sm-12 col-xs-12">
           <div class="x_panel">
             <div class="x_title">
               <h2>kWh Produced</h2>
@@ -58,8 +25,50 @@
             </div>
           </div>
         </div>
-      </div>
       <!-- end of kWh bar chart -->
+
+      <!-- start of tile stats -->
+        <div class="animated flipInY col-lg-4 col-md-4 col-sm-12 col-xs-12">
+          <div class="tile-stats">
+            <div class="count" style="font-size: 14pt; text-align: center">During this period, your
+            solar panels have reduced carbon emissions by an amount equivalent to:</div>
+          </div>
+        </div>
+        <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-6">
+          <div class="tile-stats">
+            <div class="icon"><i class="fas fa-leaf" style="width: 60px; height: 60px; margin-top: 30px"></i></div>
+            <div id="trees-planted" class="count">2</div>
+            <h3>Trees</h3>
+            <h3>Planted</h3>
+          </div>
+        </div>
+        <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-6">
+          <div class="tile-stats">
+            <div class="icon"><i class="fas fa-car" style="width: 60px; height: 60px; margin-top: 30px"></i></div>
+            <div id="miles-driven" class="count">102</div>
+            <h3>Miles</h3>
+            <h3>Driven</h3>
+          </div>
+        </div>
+        <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-6">
+          <div class="tile-stats">
+            <div class="icon"><object type="image/svg+xml" data="static/images/gas-station.svg" style="width: 60px; height: 60px; margin-top: 0px"></object></div>
+            <div id="gallons-gas" class="count">4</div>
+            <h3>Gallons</h3>
+            <h3>Gas Consumed</h3>
+          </div>
+        </div>
+        <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-6">
+          <div class="tile-stats">
+            <div class="icon"><i class="fas fa-fire" style="width: 60px; height: 60px; margin-top: 0px  "></i></div>
+            <div id="pounds-coal" class="count">2</div>
+            <h3>Pounds</h3>
+            <h3>Coal Burned</h3>
+          </div>
+        </div>
+      </div>        
+      </div>
+      <!-- end of tile stats -->
 
       <div class="clearfix"></div>
 
@@ -73,30 +82,30 @@
           <div class="x_content">
             <div class="row">
               <div class="col-sm-12">
-                <div id="main-weather-day" class="temperature" style="font-size: 14pt"><b>Monday</b><br><br>
-                </div>
+                <div id="main-weather-day" class="temperature">Monday</div>
               </div>
             </div>
             <div class="row">
               <div class="col-sm-4">
                 <div class="weather-icon">
-                  <span>
-                                      <canvas height="85" width="85" id="main-weather-icon"></canvas>
+                  <br><span>
+                                      <canvas height="90" width="90" id="main-weather-icon"></canvas>
                                   </span>
 
                 </div>
               </div>
               <div class="col-sm-8">
                 <div class="weather-text">
-                  <h2  style="font-size: 14pt">Oakland
-                                      <br><span id="main-day-weather"><i>Partly Cloudy Day</i></span>
-                                  </h2>
+                  <br><h3>Oakland</h3>
+                  <h4 id="main-day-weather"><i>Partly Cloudy Day</i></h4>                      
                 </div>
               </div>
             </div>
             <div class="col-sm-12">
-              <div class="weather-text pull-right">
-                <h3 id="main-day-high" class="degrees">23</h3>
+              <div class="weather-text pull-right" style="text-align: right">
+                <h3 id="main-day-temp" style="margin-top: 0px; margin-bottom: 5px">23&#176;</h3>
+                <h4 style="color: #73879C; margin-top: 0px; margin-bottom: 0px"><i>Cloudcover:</i></h4>
+                <h4 id="main-day-cloudcover" style="color: #73879C; margin-top: 0px; margin-bottom: 10px">21&#37;</h4>
               </div>
             </div>
             <div class="clearfix"></div>
@@ -112,19 +121,18 @@
                                           </canvas>
 
                                   </span>
-                  <h5 id="clcov-day1">15
-                                      <i>ClCov</i>
-                                  </h5>
+                  <h5 id="clcov-day1" style="margin-bottom: 0px">15</h5>
+                                      <h5 style="margin-top: 0px"><i>ClCov</i></h5>
+                                  
                 </div>
               </div>
               <div class="col-sm-2">
                 <div class="daily-weather">
-                  <h2 id="day2-high" id="weather-day2" class="day">Tue</h2>
-                  <h3 class="degrees">25</h3>
+                  <h2 id="weather-day2" class="day">Tue</h2>
+                  <h3 id="day2-high" class="degrees">25</h3>
                   <canvas id="icon-day2" height="32" width="32"></canvas>
-                  <h5 id="clcov-day2">12
-                                      <i>ClCov</i>
-                                  </h5>
+                  <h5 id="clcov-day2" style="margin-bottom: 0px">12</h5>
+                                      <h5 style="margin-top: 0px"><i>ClCov</i></h5>
                 </div>
               </div>
               <div class="col-sm-2">
@@ -132,19 +140,17 @@
                   <h2 id="weather-day3" class="day">Wed</h2>
                   <h3 id="day3-high" class="degrees">27</h3>
                   <canvas id="icon-day3" height="32" width="32"></canvas>
-                  <h5 id="clcov-day3">14
-                                      <i>ClCov</i>
-                                  </h5>
+                  <h5 id="clcov-day3" style="margin-bottom: 0px">14</h5>
+                                      <h5 style="margin-top: 0px"><i>ClCov</i></h5>
                 </div>
               </div>
               <div class="col-sm-2">
                 <div class="daily-weather">
-                  <h2 id=weather-day4" class="day">Thu</h2>
+                  <h2 id="weather-day4" class="day">Thu</h2>
                   <h3 id="day4-high" class="degrees">28</h3>
                   <canvas id="icon-day4" height="32" width="32""></canvas>
-                  <h5 id="clcov-day4">15
-                                      <i>ClCov</i>
-                                  </h5>
+                  <h5 id="clcov-day4" style="margin-bottom: 0px">15</h5>
+                                      <h5 style="margin-top: 0px"><i>ClCov</i></h5>
                 </div>
               </div>
               <div class="col-sm-2">
@@ -152,9 +158,8 @@
                   <h2 id="weather-day5" class="day">Fri</h2>
                   <h3 id="day5-high" class="degrees">28</h3>
                   <canvas id="icon-day5" height="32" width="32"></canvas>
-                  <h5 id="clcov-day5">11
-                                      <i>ClCov</i>
-                                  </h5>
+                  <h5 id="clcov-day5" style="margin-bottom: 0px">11</h5>
+                                      <h5 style="margin-top: 0px"><i>ClCov</i></h5>
                 </div>
               </div>
               <div class="col-sm-2">
@@ -162,9 +167,8 @@
                   <h2 id="weather-day6" class="day">Sat</h2>
                   <h3 id="day6-high" class="degrees">26</h3>
                   <canvas id="icon-day6" height="32" width="32"></canvas>
-                  <h5 id="clcov-day6">10
-                                      <i>ClCov</i>
-                                  </h5>
+                  <h5 id="clcov-day6" style="margin-bottom: 0px">10</h5>
+                                      <h5 style="margin-top: 0px"><i>ClCov</i></h5>
                 </div>
               </div>
               <div class="clearfix"></div>
@@ -175,25 +179,12 @@
       </div>
       <!-- end of weather widget -->
 
-      <!-- beginning cloudcover chart -->
+      <!-- start cloudcover chart -->
         <div class="col-md-4 col-sm-6 col-xs-12">
           <div class="x_panel">
             <div class="x_title">
               <h2>Avg Cloudcover</h2>
               <ul class="nav navbar-right panel_toolbox">
-<!--                 <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                </li>
-                <li class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                  <ul class="dropdown-menu" role="menu">
-                    <li><a href="#">Settings 1</a>
-                    </li>
-                    <li><a href="#">Settings 2</a>
-                    </li>
-                  </ul>
-                </li>
-                <li><a class="close-link"><i class="fa fa-close"></i></a>
-                </li> -->
               </ul>
               <div class="clearfix"></div>
             </div>
@@ -202,7 +193,7 @@
             </div>
           </div>
         </div>
-      <!-- beginning cloudcover chart -->
+      <!-- end cloudcover chart -->
 
       <!-- beginning sunstats guage -->
       <div class="col-md-4 col-sm-6 col-xs-12">
@@ -229,20 +220,24 @@
           <div class="x_content">
             <div class="dashboard-widget-content">
               <ul class="quick-list">
-                <li>Sunrise: </li>
-                <li>Sunset: </li>
-                <li>Number of hours daylight: </li>
-                <li>Solar zenith: </li>
-                <li>Time at solar zenith: </li>
+                <li>Sunrise: <span id="sunrise"></span></li>
+                <li>Sunset: <span id="sunset"></span></li>
+                <li>Number of hours<br>
+                daylight: <span id="daylight"></span> </li>
+                <li>Solar zenith: <span id="zenith"></span></li>
+                <li>Time at solar<br>
+                zenith: <span id="solar-noon"></span></li>
               </ul>
 
               <div class="sidebar-widget">
-                <h4>Solar Elevation (Now)</h4>
-                <canvas width="150" height="80" id="chart_gauge_01" class="" style="width: 160px; height: 100px;"></canvas>
+                <h4>Solar Elevation</h4>
+                <h5 class="pull-left" style="margin-left: 20px"><i>Night</i></h5>
+                <h5 class="pull-right" style="margin-right: 20px"><i>Day</i></h5>
+                <canvas width="150" height="80" id="sun-gauge" class="" style="width: 160px; height: 100px;"></canvas>
                 <div class="goal-wrapper">
-                  <span id="gauge-text" class="gauge-value gauge-chart pull-left">0</span>
+                  <span id="gauge-text" class="gauge-value gauge-chart pull-left">-90</span>
                   <span class="gauge-value pull-left">&#176;</span>
-                  <span id="goal-text" class="goal-value pull-right">180&#176;</span>
+                  <span id="goal-text" class="goal-value pull-right">90&#176;</span>
                 </div>
               </div>
             </div>

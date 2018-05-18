@@ -5055,7 +5055,7 @@ if (typeof NProgress != 'undefined') {
 		init_validator();
 		init_DataTables();
 		init_chart_doughnut();
-		init_gauge();
+		// init_gauge();
 		init_PNotify();
 		init_starrr();
 		init_calendar();
