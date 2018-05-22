@@ -31,7 +31,7 @@ def sun_single_day(date):
 	solar_noon = l.solar_noon()
 	solar_zenith = l.solar_elevation(l.solar_noon().replace(tzinfo=None))
 
-	return ({'sunrise':sunrise, 'sunset':sunset, 'daylength': day_length, 'solar_noon': solar_noon, 'zenith': solar_zenith})
+	return ({'sunrise':sunrise, 'sunset': sunset, 'daylength': day_length, 'solar_noon': solar_noon, 'zenith': solar_zenith})
 
 
 def sun_range_dates(list_dates):

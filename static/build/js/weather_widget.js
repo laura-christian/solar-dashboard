@@ -27,6 +27,8 @@ function showWeather(results) {
     mainDayConditions[i] = mainDayConditions[i].charAt(0).toUpperCase() + mainDayConditions[i].slice(1);
     }
   mainDayConditions = mainDayConditions.join(' ');
+
+  
   $("#main-day-weather").html('<i>' + mainDayConditions + '</i>');
 
   // Now update forecast values
@@ -75,7 +77,7 @@ function getWeather() {
 }
 
 // Moment.js bases its notion of "today" on local host's clock; this function would
-// potentially need to be modified if deployed on a server in a different timezone
+// potentially need to be modified if app deployed on host in a different timezone
 function updateDays() {
 
   let mainDay = moment().format('dddd');

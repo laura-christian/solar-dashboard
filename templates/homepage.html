@@ -9,11 +9,10 @@
 {% block content %}
 <div class="right_col" role="main">
     <div class="">
-      <div class="row top_tiles">
+<!--       <div class="row top_tiles"> -->
       <div class="clearfix"></div>
-
-      <!-- start of kWh bar chart -->
       <div class="row">
+      <!-- start of kWh bar chart -->
         <div class="col-md-8 col-sm-12 col-xs-12">
           <div class="x_panel">
             <div class="x_title">
@@ -65,12 +64,28 @@
             <h3>Pounds</h3>
             <h3>Coal Burned</h3>
           </div>
-        </div>
-      </div>        
-      </div>
+        </div>        
       <!-- end of tile stats -->
 
       <div class="clearfix"></div>
+    </div>
+
+      <div class="row">
+      <!-- start cloudcover chart -->
+        <div class="col-md-8 col-sm-12 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title">
+              <h2>Avg Cloudcover</h2>
+              <ul class="nav navbar-right panel_toolbox">
+              </ul>
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+              <canvas id="cloudCoverChart"></canvas>
+            </div>
+          </div>
+        </div>
+      <!-- end cloudcover chart -->
 
       <!-- start of weather widget -->
       <div class="col-md-4 col-sm-6 col-xs-12">
@@ -175,45 +190,17 @@
             </div>
           </div>
         </div>
-
       </div>
       <!-- end of weather widget -->
+    </div>
 
-      <!-- start cloudcover chart -->
-        <div class="col-md-4 col-sm-6 col-xs-12">
-          <div class="x_panel">
-            <div class="x_title">
-              <h2>Avg Cloudcover</h2>
-              <ul class="nav navbar-right panel_toolbox">
-              </ul>
-              <div class="clearfix"></div>
-            </div>
-            <div class="x_content">
-              <canvas id="lineChart"></canvas>
-            </div>
-          </div>
-        </div>
-      <!-- end cloudcover chart -->
-
+    <div class="row">
       <!-- beginning sunstats guage -->
-      <div class="col-md-4 col-sm-6 col-xs-12">
+      <div class="col-md-4 col-sm-12 col-xs-12 pull-right">
         <div class="x_panel fixed_height_320">
           <div class="x_title">
             <h2>Solar Path</h2>
             <ul class="nav navbar-right panel_toolbox">
-<!--               <li><a class="collapse-link"><i class="fas fa-chevron-up"></i></a>
-              </li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fas fa-wrench"></i></a>
-                <ul class="dropdown-menu" role="menu">
-                  <li><a href="#">Settings 1</a>
-                  </li>
-                  <li><a href="#">Settings 2</a>
-                  </li>
-                </ul>
-              </li>
-              <li><a class="close-link"><i class="fas fa-close"></i></a>
-              </li> -->
             </ul>
             <div class="clearfix"></div>
           </div>
@@ -224,13 +211,13 @@
                 <li>Sunset: <span id="sunset"></span></li>
                 <li>Number of hours<br>
                 daylight: <span id="daylight"></span> </li>
-                <li>Solar zenith: <span id="zenith"></span></li>
                 <li>Time at solar<br>
                 zenith: <span id="solar-noon"></span></li>
+                <li id="solar-zenith-toggle">Solar zenith: <span id="zenith"></span></li>
               </ul>
 
               <div class="sidebar-widget">
-                <h4>Solar Elevation</h4>
+                <h4 id="gauge-description">Solar Elevation</h4>
                 <h5 class="pull-left" style="margin-left: 20px"><i>Night</i></h5>
                 <h5 class="pull-right" style="margin-right: 20px"><i>Day</i></h5>
                 <canvas width="150" height="80" id="sun-gauge" class="" style="width: 160px; height: 100px;"></canvas>
@@ -245,6 +232,9 @@
         </div>
       </div>
       <!-- end sunstats guage -->
+    </div>
+
+
 
 {% endblock content %}
 

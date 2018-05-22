@@ -14,8 +14,8 @@ from server import app
 import os
 
 
-def load_geolocation():
-    """Load geolocation into database."""
+def load_geolocations():
+    """Load geolocation(s) into database."""
 
     with open("data/geolocation.csv", "rb") as f:
         
@@ -40,10 +40,10 @@ def load_geolocation():
             print "Geolocation committed"
 
 start_date = datetime(2016, 3, 1, 0, 0, 0)
-today = datetime(2018, 5, 12, 0, 0, 0)
+today = datetime(2018, 5, 21, 0, 0, 0)
 diff_in_days = today-start_date
 
-date_list = [start_date + timedelta(days=x) for x in range(diff_in_days.days)]
+date_list = [start_date + timedelta(days=x) for x in range(diff_in_days.days + 1)]
 
 localtz = pytz.timezone('US/Pacific')
 
@@ -70,9 +70,7 @@ def load_cloudcover_data(date_range):
 
         if response.ok:
             sunrise = data['daily']['data'][0]['sunriseTime']
-            print sunrise
             sunset = data['daily']['data'][0]['sunsetTime']
-            print sunset
 
             # Record cloudcover percentages observed at each hour within corresponding 24-hour period
             cloudcover_percentages = []
@@ -82,11 +80,11 @@ def load_cloudcover_data(date_range):
             cloudcover_percentages.sort()
             
             # Filter out nighttime cloudcover percentages (irrelevant in relation to solar energy data)
-            for i in range(len(cloudcover_percentages)-1):
+            for i in range(len(cloudcover_percentages)-2):
                 if sunrise >= cloudcover_percentages[i][0] and sunrise < cloudcover_percentages[i+1][0]:
                     start_idx = i
                 if sunset > cloudcover_percentages[i][0] and sunset <= cloudcover_percentages[i+1][0]:
-                    end_idx = i + 1
+                    end_idx = i + 2
 
             print cloudcover_percentages[start_idx:end_idx]
 
@@ -105,7 +103,7 @@ def load_cloudcover_data(date_range):
 def load_solardata():
     """Load solar output data from csv file."""
 
-    with open("data/Data_Extract_20180508-20180514.csv", "rb") as f:
+    with open("data/Data_Extract_20180501-20180521.csv", "rb") as f:
         
         reader = csv.reader(f, delimiter=",")
 
@@ -136,6 +134,7 @@ if __name__ == "__main__":
     # db.drop_all()
     # db.create_all()
 
-    # load_geolocation()
+    # load_geolocations()
     # load_cloudcover_data(date_list)
     # load_solardata()
+

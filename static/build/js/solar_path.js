@@ -55,10 +55,12 @@ function showSolarPathData(results) {
   sunGauge.setTextField(document.getElementById('gauge-text'));
   }
 
-function getSolarPathData() {
+function getSolarPathDataToday() {
     $.get('/solarpath.json', {'timeframe': 'today'}, showSolarPathData);
     console.log("AJAX call sent");
 }
 
 
-getSolarPathData()
+$(document).ready(function(){
+  getSolarPathDataToday();
+});

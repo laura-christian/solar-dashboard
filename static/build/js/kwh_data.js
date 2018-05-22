@@ -1,7 +1,7 @@
 "use strict";
 
 let ctx_bar = $('#kWhBarChart').get(0).getContext('2d');
-
+let kWhChart;
 
 function showkWhData(results) {
     renderBarGraph(results);
@@ -35,7 +35,7 @@ function showkWhData(results) {
 
   function renderBarGraph(results) {
       console.dir(results); // yay debugging!
-      let kWhChart = new Chart(ctx_bar, {
+      kWhChart = new Chart(ctx_bar, {
         type: 'bar',
         data: {
           labels: results.labels,
@@ -62,15 +62,12 @@ function showkWhData(results) {
 
   }
 
-function getkWhData() {
-    $.get('/solaroutput.json', {'timeframe': 'last_year'}, showkWhData);
+function getkWhDataToday() {
+    $.get('/solaroutput.json', {'timeframe': 'today'}, showkWhData);
     console.log("AJAX call sent");
 }
 
 
-getkWhData()
-
-
-// $(document).ready(function(){
-//   getBarGraphData();
-// });
+$(document).ready(function(){
+  getkWhDataToday();
+});
