@@ -29,7 +29,7 @@
     {% endblock head %}
   </head>
 
-  <body class="{% block body_class %} nav-md {% endblock body_class %}">
+  <body class="{% block body_class %}nav-md{% endblock body_class %}">
     {% block body %}
       <div class="container body">
         <div class="main_container">
@@ -51,7 +51,7 @@
           {% endblock content %}
 
           {% block footer %}
-            <footer>
+            <footer class="container-fluid">
               {% include "site_template/footer.html" %}
             </footer>
           {% endblock footer %}
@@ -80,18 +80,21 @@
         <script src="{{ url_for('static', filename='vendors/Chart.js/dist/Chart.min.js') }}"></script>
         <!-- gauge.js -->
         <script src="{{ url_for('static', filename='vendors/gauge.js/dist/gauge.min.js') }}"></script>
+        <!-- canvas-gauges.js -->
+        <script src="//cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.5/all/gauge.min.js"></script>
         <!-- Skycons -->
         <script src="{{ url_for('static', filename='vendors/skycons/skycons.js') }}"></script>
         <!-- DateJS -->
         <script src="{{ url_for('static', filename='vendors/DateJS/build/date.js') }}"></script>
         {% endblock %}
-        <!-- Custom Theme Scripts -->
+        <!-- Custom Scripts -->
         <script src="{{ url_for('static', filename='build/js/custom.js') }}"></script>
+        <script src="{{ url_for('static', filename='build/js/time_button_listeners.js') }}"></script>        
         <script src="{{ url_for('static', filename='build/js/kwh_data.js') }}"></script>
         <script src="{{ url_for('static', filename='build/js/weather_widget.js') }}"></script>
-        <script src="{{ url_for('static', filename='build/js/solar_path.js') }}"></script>
+        <script src="{{ url_for('static', filename='build/js/daylight.js') }}"></script>
+        <script src="{{ url_for('static', filename='build/js/solar_arc.js') }}"></script>
         <script src="{{ url_for('static', filename='build/js/cloudcover_today.js') }}"></script>
-        <script src="{{ url_for('static', filename='build/js/time_button_listeners.js') }}"></script>
     {% endblock body %}
   </body>
 </html>

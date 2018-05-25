@@ -1,10 +1,4 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func
-from datetime import datetime, date, time, timedelta, tzinfo
-import pytz
-import helper
-
-
 
 db = SQLAlchemy()
 
@@ -60,7 +54,7 @@ class Cloudcover(db.Model):
     def __repr__(self):
         """Provides helpful representation of object when printed."""
 
-        return "<Cloudcover cloudiness_id={} epoch time={} percent cloudcover={}>".format(self.cloudiness_id, self.epoch_time, self.cloudcover)
+        return "<Cloudcover date={} epoch time={} percent cloudcover={}>".format(self.local_date, self.epoch_time, self.cloudcover)
 
 
 ##############################################################################

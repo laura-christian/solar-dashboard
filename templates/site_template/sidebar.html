@@ -1,6 +1,6 @@
 <div class="left_col scroll-view">
   <div class="navbar nav_title" style="border: 0;">
-    <a href="" class="site_title"><i class="fa fa-sun"></i> <span>My Sunstats</span></a>
+    <a href="" class="site_title"><i class="fas fa-sun"></i> <span>My Sunstats</span></a>
   </div>
 
   <div class="clearfix"></div>
@@ -8,9 +8,9 @@
 
   <!-- sidebar menu -->
   <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
-    <div class="menu_section">
+    <div class="menu_section" style="margin-bottom: 10px">
       <ul class="nav side-menu">
-        <li class="time-button" value="today"><a><i class="fas fa-calendar"></i> Today </span></a>
+        <li id="today-button" class="time-button" value="today"><a><i class="fas fa-calendar"></i> Today </span></a>
         </li>
         <li class="time-button" value="yesterday"><a><i class="fas fa-calendar"></i> Yesterday </a>
         </li>
@@ -26,5 +26,8 @@
         </li>        
       </ul>
     </div>
+  </div>
+  <div class="menu_section">
+    <button type="button" id="compare-button" class="btn btn-default btn-sm" style="margin-left: 10px; font-size: 10pt">Compare to Prior Year</button>
   </div>
 </div>

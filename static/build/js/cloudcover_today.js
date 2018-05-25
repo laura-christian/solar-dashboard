@@ -10,7 +10,7 @@ function showCloudCover(results) {
     data: {
       labels: results.labels,
       datasets: [{
-      label: "% cloudcover",
+      label: '% cloudy',
       backgroundColor: "rgba(3, 88, 106, 0.3)",
       borderColor: "rgba(3, 88, 106, 0.70)",
       pointBorderColor: "rgba(3, 88, 106, 0.70)",
@@ -21,16 +21,16 @@ function showCloudCover(results) {
       data: results.data
       }]
     },
-    // options: {
-    //   scales: {
-    //     xAxes: [{
-    //       type: 'time',
-    //         ticks: {
-    //             autoSkip: true
-    //         }
-    //     }]
-    //   }
-    // }
+    options: {
+      scales: {
+        yAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Percentage'
+          }
+        }]
+      }     
+    }
   });
 }
 
@@ -44,4 +44,4 @@ $(document).ready(function(){
   getCloudCoverToday();
 });
 
-$('#today-button').on('click', getCloudCoverToday)
+$('#today-button').on('click', getCloudCoverToday);

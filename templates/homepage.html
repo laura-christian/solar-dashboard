@@ -8,10 +8,8 @@
 
 {% block content %}
 <div class="right_col" role="main">
-    <div class="">
-<!--       <div class="row top_tiles"> -->
-      <div class="clearfix"></div>
-      <div class="row">
+  <div class="clearfix"></div>
+    <div class="row">
       <!-- start of kWh bar chart -->
         <div class="col-md-8 col-sm-12 col-xs-12">
           <div class="x_panel">
@@ -59,7 +57,7 @@
         </div>
         <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-6">
           <div class="tile-stats">
-            <div class="icon"><i class="fas fa-fire" style="width: 60px; height: 60px; margin-top: 0px  "></i></div>
+            <div class="icon"><i class="fas fa-fire" style="width: 60px; height: 60px; margin-top: 0px"></i></div>
             <div id="pounds-coal" class="count">2</div>
             <h3>Pounds</h3>
             <h3>Coal Burned</h3>
@@ -70,7 +68,7 @@
       <div class="clearfix"></div>
     </div>
 
-      <div class="row">
+    <div class="row">
       <!-- start cloudcover chart -->
         <div class="col-md-8 col-sm-12 col-xs-12">
           <div class="x_panel">
@@ -163,7 +161,7 @@
                 <div class="daily-weather">
                   <h2 id="weather-day4" class="day">Thu</h2>
                   <h3 id="day4-high" class="degrees">28</h3>
-                  <canvas id="icon-day4" height="32" width="32""></canvas>
+                  <canvas id="icon-day4" height="32" width="32"></canvas>
                   <h5 id="clcov-day4" style="margin-bottom: 0px">15</h5>
                                       <h5 style="margin-top: 0px"><i>ClCov</i></h5>
                 </div>
@@ -195,18 +193,34 @@
     </div>
 
     <div class="row">
-      <!-- beginning sunstats guage -->
+      <!-- start solar arc graph -->
+        <div class="col-md-8 col-sm-12 col-xs-12">
+          <div class="x_panel">
+            <div class="x_title">
+              <h2>Solar Elevation</h2>
+              <ul class="nav navbar-right panel_toolbox">
+              </ul>
+              <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+              <canvas id="solar-arc-graph"></canvas>
+            </div>
+          </div>
+        </div>
+      <!-- end solar arc graph -->
+
+      <!-- beginning sunstats gauge -->
       <div class="col-md-4 col-sm-12 col-xs-12 pull-right">
-        <div class="x_panel fixed_height_320">
+        <div class="x_panel">
           <div class="x_title">
-            <h2>Solar Path</h2>
+            <h2 id="sun-gauge-title">Daylight/Zenith Today</h2>
             <ul class="nav navbar-right panel_toolbox">
             </ul>
             <div class="clearfix"></div>
           </div>
           <div class="x_content">
             <div class="dashboard-widget-content">
-              <ul class="quick-list">
+              <ul class="quick-list" style="font-size: 12pt">
                 <li>Sunrise: <span id="sunrise"></span></li>
                 <li>Sunset: <span id="sunset"></span></li>
                 <li>Number of hours<br>
@@ -217,21 +231,15 @@
               </ul>
 
               <div class="sidebar-widget">
-                <h4 id="gauge-description">Solar Elevation</h4>
-                <h5 class="pull-left" style="margin-left: 20px"><i>Night</i></h5>
-                <h5 class="pull-right" style="margin-right: 20px"><i>Day</i></h5>
-                <canvas width="150" height="80" id="sun-gauge" class="" style="width: 160px; height: 100px;"></canvas>
-                <div class="goal-wrapper">
-                  <span id="gauge-text" class="gauge-value gauge-chart pull-left">-90</span>
-                  <span class="gauge-value pull-left">&#176;</span>
-                  <span id="goal-text" class="goal-value pull-right">90&#176;</span>
-                </div>
+                <h4 id="gauge-description">Solar Elevation (Now)</h4>
+                <h5 class="pull-left" style="margin-left: 20px"><i>Degrees above/below horizon</i></h5>
+                <canvas id="sun-gauge"></canvas>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <!-- end sunstats guage -->
+      <!-- end sunstats gauge -->
     </div>
 
 

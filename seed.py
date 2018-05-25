@@ -3,16 +3,16 @@
 from datetime import datetime, date, timedelta
 import pytz
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from model import Geolocation, SolarOutput, Cloudcover, connect_to_db, db
 import helper
 import requests
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
 import csv
-from pprint import pprint
 from server import app
 import os
 
+localtz = pytz.timezone('US/Pacific')
+DARKSKY_TOKEN=os.environ.get('DARKSKY_TOKEN')
 
 def load_geolocations():
     """Load geolocation(s) into database."""
@@ -39,65 +39,83 @@ def load_geolocations():
 
             print "Geolocation committed"
 
-start_date = datetime(2016, 3, 1, 0, 0, 0)
-today = datetime(2018, 5, 21, 0, 0, 0)
-diff_in_days = today-start_date
+def poll_darksky(epoch_time):
+    """For retrieving historical cloudcover data from DarkSky weather API"""
 
-date_list = [start_date + timedelta(days=x) for x in range(diff_in_days.days + 1)]
+    url = "https://api.darksky.net/forecast/{token}/{lat},{long},{epoch_time}".format(token=DARKSKY_TOKEN, lat=37.8195, long=-122.2523, epoch_time=epoch_time)
+    response = requests.get(url)
+    data = response.json()
 
-localtz = pytz.timezone('US/Pacific')
+    if response.ok:
+        sunrise = data['daily']['data'][0]['sunriseTime']
+        sunset = data['daily']['data'][0]['sunsetTime']
 
-DARKSKY_TOKEN=os.environ.get('DARKSKY_TOKEN')
+        # Record cloudcover percentages observed at each hour within corresponding 24-hour period
+        cloudcover_percentages = []
+        for hourly_dict in data['hourly']['data']:
+            cloudiness = hourly_dict.get('cloudCover', 0)
+            cloudcover_percentages.append((hourly_dict['time'], cloudiness))
+        cloudcover_percentages.sort()
+        
+        # Filter out nighttime cloudcover percentages (irrelevant in relation to solar energy data)
+        for i in range(len(cloudcover_percentages)-2):
+            if sunrise >= cloudcover_percentages[i][0] and sunrise < cloudcover_percentages[i+1][0]:
+                start_idx = i
+            if sunset > cloudcover_percentages[i][0] and sunset <= cloudcover_percentages[i+1][0]:
+                end_idx = i + 2
+
+        cloudcover_percentages = cloudcover_percentages[start_idx:end_idx]
+        
+        return cloudcover_percentages
+
 
 def load_cloudcover_data(date_range):
 
-    # session = requests.Session()
-    # retry = Retry(connect=3, backoff_factor=0.5)
-    # adapter = HTTPAdapter(max_retries=retry)
-    # session.mount('http://', adapter)
-    # session.mount('https://', adapter)
-
     for date in date_range:
         # Convert naive datetime object to utc, then to epoch time
-        utc = helper.convert_naive_local_time_to_utc(date, localtz)
-        epoch_time = helper.convert_utc_to_epoch(utc)
+        utc_dt = helper.convert_naive_local_time_to_utc(date, localtz)
+        epoch_time = helper.convert_utc_to_epoch(utc_dt)
 
-        # Ping darksky API for historical weather data
+        cloudcover_percentages = poll_darksky(epoch_time)
 
-        url = "https://api.darksky.net/forecast/{token}/{lat},{long},{epoch_time}".format(token=DARKSKY_TOKEN, lat=37.8195, long=-122.2523, epoch_time=epoch_time)
-        response = requests.get(url)
-        data = response.json()
-
-        if response.ok:
-            sunrise = data['daily']['data'][0]['sunriseTime']
-            sunset = data['daily']['data'][0]['sunsetTime']
-
-            # Record cloudcover percentages observed at each hour within corresponding 24-hour period
-            cloudcover_percentages = []
-            for hourly_dict in data['hourly']['data']:
-                cloudiness = hourly_dict.get('cloudCover', 0)
-                cloudcover_percentages.append((hourly_dict['time'], cloudiness))
-            cloudcover_percentages.sort()
-            
-            # Filter out nighttime cloudcover percentages (irrelevant in relation to solar energy data)
-            for i in range(len(cloudcover_percentages)-2):
-                if sunrise >= cloudcover_percentages[i][0] and sunrise < cloudcover_percentages[i+1][0]:
-                    start_idx = i
-                if sunset > cloudcover_percentages[i][0] and sunset <= cloudcover_percentages[i+1][0]:
-                    end_idx = i + 2
-
-            print cloudcover_percentages[start_idx:end_idx]
-
-            c_records_added = 0
-            for epoch_t, cc_perc in cloudcover_percentages[start_idx:end_idx]:
-                cloudiness = Cloudcover(local_date=date.date(), epoch_time=epoch_t, cloudcover=cc_perc)
-                db.session.add(cloudiness)
-                c_records_added +=1
-                if c_records_added % 100 == 0:
-                    print c_records_added
-                    db.session.commit()
+        c_records_added = 0
+        for epoch_t, cc_perc in cloudcover_percentages:
+            cloudiness = Cloudcover(local_date=date.date(), epoch_time=epoch_t, cloudcover=cc_perc)
+            db.session.add(cloudiness)
+            c_records_added +=1
+            if c_records_added % 100 == 0:
+                print c_records_added
+                db.session.commit()
 
             db.session.commit()
+
+def update_cloudcover_data():
+
+    # Get date of last record
+    last_record = db.session.query(Cloudcover).order_by(Cloudcover.cloudiness_id.desc()).first()
+    date_of_last_record = last_record.local_date
+
+    # Delete records from last day of recorded cloudcover percentages for greater accuracy (some will
+    # have been forecast rather than observed values)
+    Cloudcover.query.filter(Cloudcover.local_date == date_of_last_record).delete()
+
+    # Convert date of last record to epoch time in order to poll Darksky API for interim cloudcover
+    # percentages
+    date_utc = helper.convert_naive_local_time_to_utc(date_of_last_record, localtz)
+    date_epoch = helper.convert_utc_to_epoch(date_utc)
+
+    today = helper.get_today_local()
+    today = datetime(today.year, today.month, today.day, 0, 0, 0) #Get today midnight (local) as naive date-time object
+
+    # Get number of days between last update and today
+    date_diff = today - date_of_last_record
+    num_days = date_diff.days
+
+    # Generate date range
+    date_range = helper.generate_date_range(date_of_last_record, num_days+1) 
+
+    # Call seeding function to load new data
+    load_cloudcover_data(date_range)
 
 
 def load_solardata():
@@ -137,4 +155,5 @@ if __name__ == "__main__":
     # load_geolocations()
     # load_cloudcover_data(date_list)
     # load_solardata()
+    # update_cloudcover_data()
 

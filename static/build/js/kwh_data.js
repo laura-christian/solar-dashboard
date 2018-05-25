@@ -21,16 +21,16 @@ function showkWhData(results) {
     $("#trees-planted").html(treesPlanted);
 
     let milesDriven = totalkWh*1.8;
-    milesDriven = milesDriven.toFixed(1);
-    $("#miles-driven").html(milesDriven);
+    milesDriven = Math.round(milesDriven);
+    $("#miles-driven").text(milesDriven);
 
     let gallonsGas = totalkWh*.084;
-    gallonsGas = gallonsGas.toFixed(1);
-    $("#gallons-gas").html(gallonsGas);
+    gallonsGas = Math.round(gallonsGas);
+    $("#gallons-gas").text(gallonsGas);
 
     let poundsCoal = totalkWh*.814;
     poundsCoal = Math.round(poundsCoal);
-    $("#pounds-coal").html(poundsCoal);
+    $("#pounds-coal").text(poundsCoal);
   }
 
   function renderBarGraph(results) {
@@ -70,4 +70,5 @@ function getkWhDataToday() {
 
 $(document).ready(function(){
   getkWhDataToday();
+  $('#today-button').addClass('active')
 });
