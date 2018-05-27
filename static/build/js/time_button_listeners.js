@@ -8,13 +8,13 @@ function updateSolarArcGraph(results) {
 	
 	let newLabels = [];
   for (let dt of results.labels) {
-    newLabels.push(moment(dt).format(results.format))
+    newLabels.push(moment(dt).format(results.format));
   }
   console.log(newLabels)
 
 	let newData = results.data;
-	let newXAxisFormat = results.format
-	let newYAxisLabel = results.yAxisLabel
+	let newXAxisFormat = results.format;
+	let newYAxisLabel = results.yAxisLabel;
 
 	solarArcGraph.data.labels = newLabels;
 	solarArcGraph.data.datasets[0].data = newData;
@@ -30,7 +30,7 @@ function updateCloudCover(results) {
 
 	cloudChart.data.labels = newLabels;
 	cloudChart.data.datasets[0].data = newData;
-	cloudChart.update()
+	cloudChart.update();
 
 }
 
@@ -53,7 +53,7 @@ function updatekWhData(results) {
 $(document).on('click', '.time-button', function() {
     
     let buttonVal = $(this).attr('value');
-    console.log(buttonVal)
+    console.log(buttonVal);
     let payload = {
     	'timeframe': buttonVal
     	};

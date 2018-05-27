@@ -1,6 +1,6 @@
 "use strict";
 
-let ctx_line = $('#cloudCoverChart').get(0).getContext('2d');
+let ctx_line = $('#cloud-cover-chart').get(0).getContext('2d');
 let cloudChart;
 
 function showCloudCover(results) {

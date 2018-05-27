@@ -16,9 +16,6 @@ l.timezone = 'US/Pacific'
 l.elevation = 125
 
 
-today = helper.get_today_local()
-yesterday = helper.get_yesterday_local()
-
 def sun_single_day(date):
 	"""Returns tuple of datetime objects and numerical values for solar patterns on a single day"""
 
