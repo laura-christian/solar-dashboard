@@ -78,15 +78,12 @@
         <script src="{{ url_for('static', filename='vendors/autosize/dist/autosize.min.js') }}"></script>
         <!-- Chart.js -->
         <script src="{{ url_for('static', filename='vendors/Chart.js/dist/Chart.min.js') }}"></script>
-        <!-- gauge.js -->
-        <script src="{{ url_for('static', filename='vendors/gauge.js/dist/gauge.min.js') }}"></script>
         <!-- canvas-gauges.js -->
         <script src="//cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.5/all/gauge.min.js"></script>
         <!-- Skycons -->
         <script src="{{ url_for('static', filename='vendors/skycons/skycons.js') }}"></script>
         <!-- DateJS -->
         <script src="{{ url_for('static', filename='vendors/DateJS/build/date.js') }}"></script>
-        {% endblock %}
         <!-- Custom Scripts -->
         <script src="{{ url_for('static', filename='build/js/custom.js') }}"></script>
         <script src="{{ url_for('static', filename='build/js/time_button_listeners.js') }}"></script>        
@@ -95,6 +92,7 @@
         <script src="{{ url_for('static', filename='build/js/daylight.js') }}"></script>
         <script src="{{ url_for('static', filename='build/js/solar_arc.js') }}"></script>
         <script src="{{ url_for('static', filename='build/js/cloudcover_today.js') }}"></script>
+      {% endblock %}
     {% endblock body %}
   </body>
 </html>

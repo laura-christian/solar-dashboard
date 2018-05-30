@@ -40,8 +40,8 @@ function showkWhData(results) {
         data: {
           labels: results.labels,
           datasets: [{
-            label: 'kwH',
-            data: results.data,
+            label: 'kWh',
+            data: results.primary_data,
             lineTension: 0,
             backgroundColor: "#26B99A"
           }]
@@ -63,12 +63,12 @@ function showkWhData(results) {
   }
 
 function getkWhDataToday() {
-    $.get('/solaroutput.json', {'timeframe': 'today'}, showkWhData);
+    $.get('/solaroutput.json', {'timeframe': 'today', 'comparative': false}, showkWhData);
     console.log("AJAX call sent");
 }
 
 
 $(document).ready(function(){
   getkWhDataToday();
-  $('#today-button').addClass('active')
+  $('#today-button').addClass('active');
 });

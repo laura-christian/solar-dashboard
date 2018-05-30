@@ -2,6 +2,10 @@
 
 let sunGauge;
 
+function updateSolarGauge(results) {
+  sunGauge.value = results.elevation
+}
+
 function showDaylightDeets(results) { 
   console.dir(results); // For debugging purposes
   showDaylightStats(results)

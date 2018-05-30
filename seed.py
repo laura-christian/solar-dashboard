@@ -12,7 +12,6 @@ from server import app
 import os
 
 localtz = pytz.timezone('US/Pacific')
-DARKSKY_TOKEN=os.environ.get('DARKSKY_TOKEN')
 
 def load_geolocations():
     """Load geolocation(s) into database."""
@@ -39,35 +38,6 @@ def load_geolocations():
 
             print "Geolocation committed"
 
-def poll_darksky(epoch_time):
-    """For retrieving historical cloudcover data from DarkSky weather API"""
-
-    url = "https://api.darksky.net/forecast/{token}/{lat},{long},{epoch_time}".format(token=DARKSKY_TOKEN, lat=37.8195, long=-122.2523, epoch_time=epoch_time)
-    response = requests.get(url)
-    data = response.json()
-
-    if response.ok:
-        sunrise = data['daily']['data'][0]['sunriseTime']
-        sunset = data['daily']['data'][0]['sunsetTime']
-
-        # Record cloudcover percentages observed at each hour within corresponding 24-hour period
-        cloudcover_percentages = []
-        for hourly_dict in data['hourly']['data']:
-            cloudiness = hourly_dict.get('cloudCover', 0)
-            cloudcover_percentages.append((hourly_dict['time'], cloudiness))
-        cloudcover_percentages.sort()
-        
-        # Filter out nighttime cloudcover percentages (irrelevant in relation to solar energy data)
-        for i in range(len(cloudcover_percentages)-2):
-            if sunrise >= cloudcover_percentages[i][0] and sunrise < cloudcover_percentages[i+1][0]:
-                start_idx = i
-            if sunset > cloudcover_percentages[i][0] and sunset <= cloudcover_percentages[i+1][0]:
-                end_idx = i + 2
-
-        cloudcover_percentages = cloudcover_percentages[start_idx:end_idx]
-        
-        return cloudcover_percentages
-
 
 def load_cloudcover_data(date_range):
 
@@ -76,7 +46,7 @@ def load_cloudcover_data(date_range):
         utc_dt = helper.convert_naive_local_time_to_utc(date, localtz)
         epoch_time = helper.convert_utc_to_epoch(utc_dt)
 
-        cloudcover_percentages = poll_darksky(epoch_time)
+        cloudcover_percentages = helper.poll_darksky(epoch_time)
 
         c_records_added = 0
         for epoch_t, cc_perc in cloudcover_percentages:
@@ -118,10 +88,10 @@ def update_cloudcover_data():
     load_cloudcover_data(date_range)
 
 
-def load_solardata():
+def load_solardata(file):
     """Load solar output data from csv file."""
 
-    with open("data/Data_Extract_20180501-20180521.csv", "rb") as f:
+    with open("data/{}.csv".format(file), "rb") as f:
         
         reader = csv.reader(f, delimiter=",")
 
@@ -149,11 +119,18 @@ def load_solardata():
 
 if __name__ == "__main__":
     connect_to_db(app)
-    # db.drop_all()
-    # db.create_all()
+    db.drop_all()
+    db.create_all()
 
-    # load_geolocations()
-    # load_cloudcover_data(date_list)
-    # load_solardata()
+    load_geolocations()
+    start_date = datetime(2016, 3, 1, 0, 0, 0)
+    today = datetime.today()
+    today = today.replace(hour=0, minute=0)
+    diff_in_days = today-start_date
+    date_list = [start_date + timedelta(days=x) for x in range(diff_in_days.days +1)]
+    load_cloudcover_data(date_list)
+    files = ['Data_Extract_20160314-20180509', 'Data_Extract_20180501-20180521']
+    for file in files:
+        load_solardata(file)
     # update_cloudcover_data()
 

@@ -1,10 +1,13 @@
 from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
 import pytz
+import os
+import requests
 
-######################################Time-based Helper Functions##############################################
+######################################Helper Functions for Handling Time Operations and Populating Graphs###################################
 
 localtz = pytz.timezone('US/Pacific')
+DARKSKY_TOKEN=os.environ.get('DARKSKY_TOKEN')
 
 def get_today_local():
 
@@ -71,6 +74,11 @@ def get_first_last_year():
 
     return today.replace(year=last_year, month=1, day=1)
 
+def generate_date_range(start_date, num_days):
+   """For generating range of dates between start and end dates"""
+
+   return [start_date + timedelta(days=x) for x in range(num_days)]
+
 def get_intervals(timeframe):
 
     if timeframe == 'today':
@@ -126,7 +134,7 @@ def get_intervals(timeframe):
         start_date = get_first_last_year()
         end_date = get_first_this_year()
         prior_year_start = start_date.replace(year=(start_date.year-1))
-        prior_year_end = end_date
+        prior_year_end = start_date
         display_increment = 'month'
 
     return (start_date, end_date, prior_year_start, prior_year_end, display_increment)
@@ -135,29 +143,29 @@ def generate_date_ranges(timeframe):
 
     if timeframe == 'last_seven_days':
 
-        start_date = helper.get_seven_days_ago()
-        end_date = helper.get_today_local() + timedelta(days=1)
+        start_date = get_seven_days_ago()
+        end_date = get_today_local() + timedelta(days=1)
         num_days = (end_date - start_date).days
         date_range = [start_date + timedelta(days=x) for x in range(num_days)]
 
     elif timeframe == 'this_month':
              
-        start_date = helper.get_first_day_this_month()
-        end_date = helper.get_today_local() + timedelta(days=1)
+        start_date = get_first_day_this_month()
+        end_date = get_today_local() + timedelta(days=1)
         num_days = (end_date - start_date).days
         date_range = [start_date + timedelta(days=x) for x in range(num_days)]
 
     elif timeframe == 'last_month':
 
-        start_date = helper.get_first_day_last_month()
-        end_date = helper.get_first_day_this_month()
+        start_date = get_first_day_last_month()
+        end_date = get_first_day_this_month()
         num_days = (end_date - start_date).days
         date_range = [start_date + timedelta(days=x) for x in range(num_days)]
 
     elif timeframe == 'this_year':
 
-        start_date = helper.get_first_this_year()
-        today = helper.get_today_local()
+        start_date = get_first_this_year()
+        today = get_today_local()
         current_month = today.month
         current_day = today.day
         date_range = []
@@ -172,66 +180,103 @@ def generate_date_ranges(timeframe):
 
     elif timeframe == 'last_year':
              
-        start_date = helper.get_first_last_year()
-        end_date = helper.get_first_this_year()
+        start_date = get_first_last_year()
+        end_date = get_first_this_year()
         date_range = []
         for m in range(1, 13):
             date_range.append(start_date.replace(month=m))
             date_range.append(date_range[-1]+timedelta(days=14))
         date_range.append(end_date - timedelta(days=1))
 
+    return date_range
+
 def generate_kWh_chart_data(display_increment, q, prior_y_q):
     """Iterate over SQLAlchemy query results to get labels and data for bar chart and totals for tile stats"""
 
-    formats = {'hour': '%-I %p', 'day': '%-m/%-d', 'month': '%b'}
+    formats = {'hour': '%-I %p', 'day': '%m/%d', 'month': '%m-%b'}
 
     primary_labels = []
     prior_y_labels = []
-    primary_data = []
-    prior_y_data = []
+    primary_data = {}
+    prior_y_data = {}
     for dt, kWh in q:
         if display_increment == 'hour':
             dt += timedelta(hours=1) #Adding an hour so that kWh sums reflect totals at top of *next* hour
         dt = dt.strftime(formats[display_increment]) # Convert to string reflecting local date/time
         primary_labels.append(dt)
-        primary_data.append(dt, kWh)
+        primary_data[dt] = kWh
     for dt, kWh in prior_y_q:
         if display_increment == 'hour':
             dt += timedelta(hours=1) #Adding an hour so that kWh sums reflect totals at top of *next* hour
         dt = dt.strftime(formats[display_increment]) # Convert to string reflecting local date/time
-        primary_labels.append(dt)
-        primary_data.append((dt, kWh))
+        prior_y_labels.append(dt)
+        prior_y_data[dt] = kWh
 
     # If prior_y_labels remains an empty list, comparative data has not been requested and need not be returned 
     if prior_y_labels == []:
         labels = primary_labels
-        primary_data = [x[1] for x in primary_data]
+        primary_data = [primary_data[label] for label in primary_labels]
     # If x-axis values are congruent for the two data sets, one set of labels can be used to plot both
     elif primary_labels == prior_y_labels:
         labels = primary_labels
-        primary_data = [x[1] for x in primary_data]
-        prior_y_data = [x[1] for x in prior_y_data]
+        primary_data = [primary_data[label] for label in labels]
+        prior_y_data = [prior_y_data[label] for label in labels]
     # This third condition is meant to account for the fact that query results for current timeframe and prior year may not always yield the 
     # same number of data points, in which case label sets must be merged
     else:
         labels = sorted(list(set(primary_labels) | set(prior_y_labels)))
-        primary_data = [x[1] if x[0] in labels else 0 for x in primary_data]
-        prior_y_data = [x[1] if x[0] in labels else 0 for x in prior_y_data]
+        primary_data = [primary_data[label] if label in primary_data else 0 for label in labels]
+        prior_y_data = [prior_y_data[label] if label in prior_y_data else 0 for label in labels]
 
-    # For updating tile stats, which will only ever reflect emission reduction equivalents for current (not prior-year) time period
+    if display_increment == 'month':
+        labels = [label.split('-')[1] for label in labels]
+    elif display_increment == 'day':
+        labels = [label[1:] if label[0] == '0' else label for label in labels]
+
+    # For updating tile stats, which will only ever reflect emission reduction equivalents for current (not prior-year) timeframe
     total_kWh = sum(primary_data)
 
     return {'labels': labels, 'primary_data': primary_data, 'prior_y_data': prior_y_data, 'total_kWh': total_kWh}
 
+
+def poll_darksky(epoch_time):
+    """For retrieving historical cloudcover data from DarkSky weather API"""
+
+    url = "https://api.darksky.net/forecast/{token}/{lat},{long},{epoch_time}".format(token=DARKSKY_TOKEN, lat=37.8195, long=-122.2523, epoch_time=epoch_time)
+    response = requests.get(url)
+    data = response.json()
+
+    if response.ok:
+        sunrise = data['daily']['data'][0]['sunriseTime']
+        sunset = data['daily']['data'][0]['sunsetTime']
+
+        # Record cloudcover percentages observed at each hour within corresponding 24-hour period
+        cloudcover_percentages = []
+        for hourly_dict in data['hourly']['data']:
+            cloudiness = hourly_dict.get('cloudCover', 0)
+            cloudcover_percentages.append((hourly_dict['time'], cloudiness))
+        cloudcover_percentages.sort()
+        
+        # Filter out nighttime cloudcover percentages (irrelevant in relation to solar energy data)
+        for i in range(len(cloudcover_percentages)-2):
+            if sunrise >= cloudcover_percentages[i][0] and sunrise < cloudcover_percentages[i+1][0]:
+                start_idx = i
+            if sunset > cloudcover_percentages[i][0] and sunset <= cloudcover_percentages[i+1][0]:
+                end_idx = i + 2
+
+        cloudcover_percentages = cloudcover_percentages[start_idx:end_idx]
+        
+        return cloudcover_percentages
+
 def generate_cloudcov_chart_data(display_increment, q, prior_y_q):
     """Iterate over SQLAlchemy query results to get labels and data for cloudcover line graph"""
     
-    formats = {'hour' '%-I %p': 'day': '%-m/%-d', 'month': '%b'}
+    formats = {'hour': '%-I %p', 'day': '%m/%d', 'month': '%m-%b'}
 
     primary_labels = []
     prior_y_labels = []
-    primary_data = []
-    prior_y_data = []
+    primary_data = {}
+    prior_y_data = {}
 
     if display_increment == 'hour':
     # Labels for single-day intervals must be generated separately since hourly cloudcover observations are fetched from API and recorded
@@ -240,16 +285,16 @@ def generate_cloudcov_chart_data(display_increment, q, prior_y_q):
             utc_time = datetime.fromtimestamp(cc_obj.epoch_time)
             utc_time = utc_time.replace(tzinfo=pytz.utc)
             local_time = utc_time.astimezone(localtz)
-            local_time = local_time.strftime(formats[display_increment]) # Convert epoch time values to local time in hourly intervals
+            local_time = local_time.strftime(formats[display_increment]) # Convert epoch time values to local time (hourly intervals)
             primary_labels.append(local_time)
-            primary_data.append((local_time, int(cc_obj.cloudcover*100)))
+            primary_data[local_time] = int(cc_obj.cloudcover*100)
         for cc_obj in prior_y_q:
             utc_time = datetime.fromtimestamp(cc_obj.epoch_time)
             utc_time = utc_time.replace(tzinfo=pytz.utc)
             local_time = utc_time.astimezone(localtz)
-            local_time = local_time.strftime(formats[display_increment]) # Convert epoch time values to local time in hourly intervals
+            local_time = local_time.strftime(formats[display_increment]) # Convert epoch time values to local time (hourly intervals)
             prior_y_labels.append(local_time)
-            prior_y_data.append((local_time, int(cc_obj.cloudcover*100)))
+            prior_y_data[local_time] = int(cc_obj.cloudcover*100)
 
     else:
     # Labels for intervals of more than a day correspond to cloudcover percentages that have already been averaged and grouped by day or month;
@@ -257,28 +302,32 @@ def generate_cloudcov_chart_data(display_increment, q, prior_y_q):
         for local_date, cloudcover_percentage in q:
             local_date = local_date.strftime(formats[display_increment])  # Convert datetime object to string reflecting local date/month
             primary_labels.append(local_date)
-            primary_data.append((local_date, int(cloudcover_percentage*100)))
+            primary_data[local_date] = int(cloudcover_percentage*100)
         for local_date, cloudcover_percentage in prior_y_q:
             local_date = local_date.strftime(formats[display_increment])  # Convert datetime object to string reflecting local date/month
             prior_y_labels.append(local_date)
-            prior_y_data.append((local_date, int(cloudcover_percentage*100)))
+            prior_y_data[local_date] = int(cloudcover_percentage*100)
 
     # If prior_y_labels remains an empty list, comparative data has not been requested and need not be returned 
     if prior_y_labels == []:
         labels = primary_labels
-        primary_data = [x[1] for x in primary_data]
+        primary_data = [primary_data[label] for label in labels]
     # If x-axis values are congruent for the two data sets, one set of labels can be used to plot both
     elif primary_labels == prior_y_labels:
         labels = primary_labels
-        primary_data = [x[1] for x in primary_data]
-        prior_y_data = [x[1] for x in prior_y_data]
+        primary_data = [primary_data[label] for label in labels]
+        prior_y_data = [prior_y_data[label] for label in labels]
     # This third condition is meant to account for the fact that query results for current timeframe and prior year may not always yield the 
     # same number of data points, in which case label sets must be merged
     else:
         labels = sorted(list(set(primary_labels) | set(prior_y_labels)))
-        primary_data = [x[1] if x[0] in labels else 0 for x in primary_data]
-        prior_y_data = [x[1] if x[0] in labels else 0 for x in prior_y_data]
+        primary_data = [primary_data[label] if label in primary_data else 'null' for label in labels]
+        prior_y_data = [prior_y_data[label] if label in prior_y_data else 'null' for label in labels]
+
+    if display_increment == 'month':
+        labels = [label.split('-')[1] for label in labels]
+    elif display_increment == 'day':
+        labels = [label[1:] if label[0] == '0' else label for label in labels]
 
 
-    return {'labels': labels, 'primary_data': primary_data,
-                'prior_y_data': prior_y_data}
+    return {'labels': labels, 'primary_data': primary_data, 'prior_y_data': prior_y_data}

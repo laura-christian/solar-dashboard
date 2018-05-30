@@ -18,7 +18,7 @@ function showCloudCover(results) {
       pointHoverBackgroundColor: "#fff",
       pointHoverBorderColor: "rgba(151,187,205,1)",
       pointBorderWidth: 1,
-      data: results.data
+      data: results.primary_data
       }]
     },
     options: {
@@ -35,7 +35,7 @@ function showCloudCover(results) {
 }
 
 function getCloudCoverToday() {
-    $.get('/cloudcover_today.json', showCloudCover);
+    $.get('/cloudcover_today.json', {'comparative': false}, showCloudCover);
     console.log("AJAX call sent");
 }
 
