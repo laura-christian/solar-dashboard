@@ -6,6 +6,7 @@ import sys
 import os
 from model import connect_to_db, db, Geolocation, SolarOutput, Cloudcover
 import helper
+import seed
 from astral import Astral, Location
 import sunstats
 import requests
@@ -29,15 +30,6 @@ if path_source not in sys.path:
 DARKSKY_TOKEN=os.environ.get('DARKSKY_TOKEN')
 localtz = pytz.timezone('US/Pacific')
 
-a = Astral()
-a.solar_depression = 'civil'
-
-l = Location()
-l.latitude = 37.8195
-l.longitude = -122.2523
-l.timezone = 'US/Pacific'
-l.elevation = 125
-
 @app.before_request
 def add_tests():
 
@@ -48,7 +40,7 @@ def add_tests():
 def index():
     """Render homepage."""
 
-    # seed.update_cloudcover_data()
+    seed.update_cloudcover_data()
 
     return render_template("homepage.html")
 
@@ -95,7 +87,16 @@ def get_kWh_data():
 @app.route("/daylight_deets.json")
 def get_daylight_details():
     """Get details of solar path/daylight hours at site for today (local)"""
-    
+
+    a = Astral()
+    a.solar_depression = 'civil'
+
+    l = Location()
+    l.latitude = 37.8195
+    l.longitude = -122.2523
+    l.timezone = 'US/Pacific'
+    l.elevation = 125
+
     sunrise = l.sunrise().strftime('%-I:%M%p')
     sunset = l.sunset().strftime('%-I:%M%p')
     day_length = str(l.sunset()-l.sunrise())
@@ -148,10 +149,8 @@ def get_weather_forecast():
 def get_cloudcover_today():
     """Retrieve observed/anticipated cloudcover patterns for today and a year ago today from DarkSky API"""
 
-    if request.args.get('comparative') == 'true':
-        comparative = True 
-    else:
-        comparative = False
+    True if request.args.get('comparative') == 'true' else False
+
     display_increment = 'hour'
 
     today = helper.get_today_local()
@@ -181,10 +180,7 @@ def get_cloudcover_data():
     """Get average cloudcover for different slices of time in the past"""
 
     timeframe=request.args.get('timeframe')
-    if request.args.get('comparative') == 'true':
-        comparative = True 
-    else:
-        comparative = False
+    True if request.args.get('comparative') == 'true' else False
 
     interval = helper.get_intervals(timeframe)
     start_date = interval[0]
