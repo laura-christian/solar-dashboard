@@ -6,7 +6,6 @@ import sys
 import os
 from model import connect_to_db, db, Geolocation, SolarOutput, Cloudcover
 import helper
-import seed
 from astral import Astral, Location
 import sunstats
 import requests
@@ -40,7 +39,7 @@ def add_tests():
 def index():
     """Render homepage."""
 
-    seed.update_cloudcover_data()
+    # helper.update_cloudcover_data()
 
     return render_template("homepage.html")
 
@@ -49,11 +48,8 @@ def index():
 def get_kWh_data():
     """Aggregate solar output data for different slices of time"""
 
-    timeframe=request.args.get('timeframe')
-    if request.args.get('comparative') == 'true':
-        comparative = True 
-    else:
-        comparative = False
+    timeframe = request.args.get('timeframe')
+    comparative = True if request.args.get('comparative') == 'true' else False
 
     interval = helper.get_intervals(timeframe)
     start_date = interval[0]
@@ -124,7 +120,7 @@ def get_solar_arc_data():
         solar_arc_data = sunstats.solar_arc_single_day(yesterday)
 
     else:
-        date_range = helper.generate_date_ranges(timeframe)
+        date_range = helper.generate_y_axis_points(timeframe)
         solar_arc_data = sunstats.zenith_range_dates(date_range, timeframe)
 
     return jsonify(solar_arc_data)
@@ -149,7 +145,7 @@ def get_weather_forecast():
 def get_cloudcover_today():
     """Retrieve observed/anticipated cloudcover patterns for today and a year ago today from DarkSky API"""
 
-    True if request.args.get('comparative') == 'true' else False
+    comparative = True if request.args.get('comparative') == 'true' else False
 
     display_increment = 'hour'
 
@@ -168,7 +164,7 @@ def get_cloudcover_today():
     if comparative:
         prior_year_start = today - relativedelta(years=1)
         prior_year_end = prior_year_start + timedelta(days=1)
-        prior_y_q = Cloudcover.query.filter(Cloudcover.local_date>=prior_year_start, Cloudcover.local_date<prior_year_end)
+        prior_y_q = Cloudcover.query.filter(Cloudcover.local_date>=prior_year_start, Cloudcover.local_date<prior_year_end).all()
 
     chart_data = helper.generate_cloudcov_chart_data(display_increment, cc_objs, prior_y_q)
 
@@ -180,7 +176,7 @@ def get_cloudcover_data():
     """Get average cloudcover for different slices of time in the past"""
 
     timeframe=request.args.get('timeframe')
-    True if request.args.get('comparative') == 'true' else False
+    comparative = True if request.args.get('comparative') == 'true' else False
 
     interval = helper.get_intervals(timeframe)
     start_date = interval[0]
@@ -191,10 +187,10 @@ def get_cloudcover_data():
 
     if timeframe == 'yesterday':
         # Single-day intervals must be handled via dedicated queries since hourly cloudcover data recorded in Unix time:
-        q = Cloudcover.query.filter(Cloudcover.local_date>=start_date, Cloudcover.local_date<end_date)
+        q = Cloudcover.query.filter(Cloudcover.local_date>=start_date, Cloudcover.local_date<end_date).all()
         prior_y_q = []
         if comparative:
-            prior_y_q = Cloudcover.query.filter(Cloudcover.local_date>=prior_year_start, Cloudcover.local_date<prior_year_end)
+            prior_y_q = Cloudcover.query.filter(Cloudcover.local_date>=prior_year_start, Cloudcover.local_date<prior_year_end).all()
 
     else:
         # Create subquery object to capture all cloudcover values b/w start and end dates

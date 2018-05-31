@@ -1,8 +1,10 @@
+from model import Geolocation, SolarOutput, Cloudcover, connect_to_db, db
 from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
 import pytz
 import os
 import requests
+import seed
 
 ######################################Helper Functions for Handling Time Operations and Populating Graphs###################################
 
@@ -10,6 +12,9 @@ localtz = pytz.timezone('US/Pacific')
 DARKSKY_TOKEN=os.environ.get('DARKSKY_TOKEN')
 
 def get_today_local():
+    """Returns today's date in Pacific Daylight Time; for doc-testing purposes, change date below.
+    >>> get_today_local()
+    datetime.date(2018, 5, 31)"""
 
     today = datetime.today()
     utc_dt = pytz.utc.localize(today)
@@ -26,7 +31,10 @@ def convert_naive_local_time_to_utc(dtobj, localtz):
     return local_dt.astimezone(pytz.utc) 
 
 def convert_utc_to_epoch(utc_dtobj):
-    """Converts timezone-aware utc date object to seconds since epoch as integer"""
+    """Converts timezone-aware utc date object to seconds since epoch as integer
+    >>> convert_utc_to_epoch(datetime(2018, 6, 1, 2, 35, 35, 785354, tzinfo=pytz.utc))
+    1527820535
+    """
 
     epoch = datetime.fromtimestamp(0)
     utc_unaware = utc_dtobj.replace(tzinfo=None)
@@ -34,6 +42,9 @@ def convert_utc_to_epoch(utc_dtobj):
     return int((utc_unaware - epoch).total_seconds())
 
 def get_yesterday_local():
+    """Returns yesterday's date in Pacific Daylight Time; for doc-testing purposes, change date below
+    >>> get_yesterday_local()
+    datetime.date(2018, 5, 30)"""
 
     today = datetime.today()
     today_local = get_today_local()
@@ -41,18 +52,27 @@ def get_yesterday_local():
     return today_local - timedelta(days=1)
 
 def get_seven_days_ago():
+    """Returns yesterday's date in Pacific Daylight Time; for doc-testing purposes, change date below
+    >>> get_seven_days_ago()
+    datetime.date(2018, 5, 25)"""
 
     today = get_today_local()
 
     return today - timedelta(days=6)
 
 def get_first_day_this_month():
+    """Returns first day of current month in Pacific Daylight Time; for doc-testing purposes, change date below
+    >>> get_first_day_this_month()
+    datetime.date(2018, 5, 1)"""
 
     today = get_today_local()
 
     return today.replace(day=1)
 
 def get_first_day_last_month():
+    """Returns first day of last month in Pacific Daylight Time; for doc-testing purposes, change date below
+    >>> get_first_day_last_month()
+    datetime.date(2018, 4, 1)"""
 
     today = get_today_local()
     first_this_month = get_first_day_this_month()
@@ -61,12 +81,18 @@ def get_first_day_last_month():
     return last_last_month.replace(day=1)
 
 def get_first_this_year():
+    """Returns first day of the current year in Pacific Daylight Time; for doc-testing purposes, change date below
+    >>> get_first_this_year()
+    datetime.date(2018, 1, 1)"""
 
     today = get_today_local() 
 
     return today.replace(month=1, day=1)
 
 def get_first_last_year():
+    """Returns first day of last year in Pacific Daylight Time; for doc-testing purposes, change date below
+    >>> get_first_last_year()
+    datetime.date(2017, 1, 1)"""
 
     today = get_today_local()
     year_today = today.year
@@ -75,9 +101,11 @@ def get_first_last_year():
     return today.replace(year=last_year, month=1, day=1)
 
 def generate_date_range(start_date, num_days):
-   """For generating range of dates between start and end dates"""
-
-   return [start_date + timedelta(days=x) for x in range(num_days)]
+    """For generating range of dates to be passed into other functions
+    >>> generate_date_range(datetime(2018, 1, 1), 5)
+    [datetime.datetime(2018, 1, 1, 0, 0), datetime.datetime(2018, 1, 2, 0, 0), datetime.datetime(2018, 1, 3, 0, 0), datetime.datetime(2018, 1, 4, 0, 0), datetime.datetime(2018, 1, 5, 0, 0)]
+    """
+    return [start_date + timedelta(days=x) for x in range(num_days)]
 
 def get_intervals(timeframe):
 
@@ -126,7 +154,7 @@ def get_intervals(timeframe):
         start_date = get_first_this_year()
         end_date = get_today_local() + timedelta(days=1)
         prior_year_start = start_date.replace(year=(start_date.year-1))
-        prior_year_end = end_date - relativedelta(years=1)
+        prior_year_end = start_date
         display_increment = 'month'
 
     elif timeframe == 'last_year':
@@ -139,7 +167,7 @@ def get_intervals(timeframe):
 
     return (start_date, end_date, prior_year_start, prior_year_end, display_increment)
 
-def generate_date_ranges(timeframe):
+def generate_y_axis_points(timeframe):
 
     if timeframe == 'last_seven_days':
 
@@ -193,7 +221,7 @@ def generate_date_ranges(timeframe):
 def generate_kWh_chart_data(display_increment, q, prior_y_q):
     """Iterate over SQLAlchemy query results to get labels and data for bar chart and totals for tile stats"""
 
-    formats = {'hour': '%-I %p', 'day': '%m/%d', 'month': '%m-%b'}
+    formats = {'hour': '%H-%-I %p', 'day': '%m/%d', 'month': '%m-%b'}
 
     primary_labels = []
     prior_y_labels = []
@@ -228,10 +256,13 @@ def generate_kWh_chart_data(display_increment, q, prior_y_q):
         primary_data = [primary_data[label] if label in primary_data else 0 for label in labels]
         prior_y_data = [prior_y_data[label] if label in prior_y_data else 0 for label in labels]
 
+    # Datetime labels had to start with zero-padded numeric figures to be properly sortable; here they get left-stripped for display purposes
     if display_increment == 'month':
         labels = [label.split('-')[1] for label in labels]
     elif display_increment == 'day':
         labels = [label[1:] if label[0] == '0' else label for label in labels]
+    elif display_increment == 'hour':
+        labels = [label[3:] for label in labels]
 
     # For updating tile stats, which will only ever reflect emission reduction equivalents for current (not prior-year) timeframe
     total_kWh = sum(primary_data)
@@ -271,7 +302,7 @@ def poll_darksky(epoch_time):
 def generate_cloudcov_chart_data(display_increment, q, prior_y_q):
     """Iterate over SQLAlchemy query results to get labels and data for cloudcover line graph"""
     
-    formats = {'hour': '%-I %p', 'day': '%m/%d', 'month': '%m-%b'}
+    formats = {'hour': '%H-%-I %p', 'day': '%m/%d', 'month': '%m-%b'}
 
     primary_labels = []
     prior_y_labels = []
@@ -324,10 +355,51 @@ def generate_cloudcov_chart_data(display_increment, q, prior_y_q):
         primary_data = [primary_data[label] if label in primary_data else 'null' for label in labels]
         prior_y_data = [prior_y_data[label] if label in prior_y_data else 'null' for label in labels]
 
+    # Datetime labels had to start with zero-padded numeric figures to be properly sortable; here they get left-stripped for display purposes
     if display_increment == 'month':
         labels = [label.split('-')[1] for label in labels]
     elif display_increment == 'day':
         labels = [label[1:] if label[0] == '0' else label for label in labels]
-
+    elif display_increment == 'hour':
+        labels = [label[3:] for label in labels]
 
     return {'labels': labels, 'primary_data': primary_data, 'prior_y_data': prior_y_data}
+
+
+def update_cloudcover_data():
+
+    # Get date of last record
+    last_record = db.session.query(Cloudcover).order_by(Cloudcover.cloudiness_id.desc()).first()
+    date_of_last_record = last_record.local_date
+
+    # Delete records from last day of recorded cloudcover percentages for greater accuracy (some will
+    # have been forecast rather than observed values)
+    Cloudcover.query.filter(Cloudcover.local_date == date_of_last_record).delete()
+
+    # Convert date of last record to epoch time in order to poll Darksky API for interim cloudcover
+    # percentages
+    date_utc = convert_naive_local_time_to_utc(date_of_last_record, localtz)
+    date_epoch = convert_utc_to_epoch(date_utc)
+
+    today = get_today_local()
+    today = datetime(today.year, today.month, today.day, 0, 0, 0) #Get today midnight (local) as naive date-time object
+
+    # Get number of days between last update and today
+    date_diff = today - date_of_last_record
+    num_days = date_diff.days
+
+    # Generate date range
+    date_range = generate_date_range(date_of_last_record, num_days+1) 
+
+    # Call seeding function to load new data
+    seed.load_cloudcover_data(date_range)
+
+
+# if __name__ == "__main__":
+    # import doctest
+
+    # print()
+    # result = doctest.testmod()
+    # if not result.failed:
+    #     print("ALL TESTS PASSED.")
+    # print()

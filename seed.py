@@ -59,35 +59,6 @@ def load_cloudcover_data(date_range):
 
             db.session.commit()
 
-def update_cloudcover_data():
-
-    # Get date of last record
-    last_record = db.session.query(Cloudcover).order_by(Cloudcover.cloudiness_id.desc()).first()
-    date_of_last_record = last_record.local_date
-
-    # Delete records from last day of recorded cloudcover percentages for greater accuracy (some will
-    # have been forecast rather than observed values)
-    Cloudcover.query.filter(Cloudcover.local_date == date_of_last_record).delete()
-
-    # Convert date of last record to epoch time in order to poll Darksky API for interim cloudcover
-    # percentages
-    date_utc = helper.convert_naive_local_time_to_utc(date_of_last_record, localtz)
-    date_epoch = helper.convert_utc_to_epoch(date_utc)
-
-    today = helper.get_today_local()
-    today = datetime(today.year, today.month, today.day, 0, 0, 0) #Get today midnight (local) as naive date-time object
-
-    # Get number of days between last update and today
-    date_diff = today - date_of_last_record
-    num_days = date_diff.days
-
-    # Generate date range
-    date_range = helper.generate_date_range(date_of_last_record, num_days+1) 
-
-    # Call seeding function to load new data
-    load_cloudcover_data(date_range)
-
-
 def load_solardata(file):
     """Load solar output data from csv file."""
 
@@ -119,18 +90,18 @@ def load_solardata(file):
 
 if __name__ == "__main__":
     connect_to_db(app)
-    db.drop_all()
-    db.create_all()
+    # db.drop_all()
+    # db.create_all()
 
-    load_geolocations()
-    start_date = datetime(2016, 3, 1, 0, 0, 0)
-    today = datetime.today()
-    today = today.replace(hour=0, minute=0)
-    diff_in_days = today-start_date
-    date_list = [start_date + timedelta(days=x) for x in range(diff_in_days.days +1)]
-    load_cloudcover_data(date_list)
-    files = ['Data_Extract_20160314-20180509', 'Data_Extract_20180501-20180521']
-    for file in files:
-        load_solardata(file)
+    # load_geolocations()
+    # start_date = datetime(2016, 3, 1, 0, 0, 0)
+    # today = datetime.today()
+    # today = today.replace(hour=0, minute=0)
+    # diff_in_days = today-start_date
+    # date_list = [start_date + timedelta(days=x) for x in range(diff_in_days.days +1)]
+    # load_cloudcover_data(date_list)
+    # files = ['Data_Extract_Manual_Compile']
+    # for file in files:
+        # load_solardata(file)
     # update_cloudcover_data()
 
