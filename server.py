@@ -120,7 +120,7 @@ def get_solar_arc_data():
         solar_arc_data = sunstats.solar_arc_single_day(yesterday)
 
     else:
-        date_range = helper.generate_y_axis_points(timeframe)
+        date_range = helper.generate_x_axis_points(timeframe)
         solar_arc_data = sunstats.zenith_range_dates(date_range, timeframe)
 
     return jsonify(solar_arc_data)

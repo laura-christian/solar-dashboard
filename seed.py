@@ -8,7 +8,7 @@ from model import Geolocation, SolarOutput, Cloudcover, connect_to_db, db
 import helper
 import requests
 import csv
-from server import app
+# from server import app
 import os
 
 localtz = pytz.timezone('US/Pacific')
@@ -88,8 +88,8 @@ def load_solardata(file):
         db.session.commit()
 
 
-if __name__ == "__main__":
-    connect_to_db(app)
+# if __name__ == "__main__":
+    # connect_to_db(app)
     # db.drop_all()
     # db.create_all()
 
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     # diff_in_days = today-start_date
     # date_list = [start_date + timedelta(days=x) for x in range(diff_in_days.days +1)]
     # load_cloudcover_data(date_list)
-    # files = ['Data_Extract_Manual_Compile']
+    # files = ['Data_Extract_Manual_Compile2']
     # for file in files:
         # load_solardata(file)
     # update_cloudcover_data()

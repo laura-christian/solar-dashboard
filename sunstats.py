@@ -46,7 +46,7 @@ def zenith_range_dates(list_dates, timeframe):
 	elif timeframe == 'this_year' or timeframe == 'last_year':
 		format = 'MMM D'
 
-	return {'labels': list_dates, 'data': zeniths, 'yAxisLabel': 'Solar Zenith (Degrees)', 'format': format}
+	return {'labels': list_dates, 'data': zeniths, 'yAxisLabel': 'Solar Zenith', 'format': format}
 
 def solar_arc_single_day(date):
 
@@ -64,7 +64,7 @@ def solar_arc_single_day(date):
 
 	solar_positions = [l.solar_elevation(time) for time in times]
 
-	return {'labels': time_strings, 'data': solar_positions, 'yAxisLabel': 'Solar Elevation (Degrees)', 'format': 'h A'}
+	return {'labels': time_strings, 'data': solar_positions, 'yAxisLabel': 'Solar Elevation', 'format': 'h A'}
 
 
 

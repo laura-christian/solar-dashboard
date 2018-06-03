@@ -6,7 +6,7 @@ import os
 import requests
 import seed
 
-######################################Helper Functions for Handling Time Operations and Populating Graphs###################################
+###################################### Helper Functions for Handling Time Operations and Populating Graphs ###################################
 
 localtz = pytz.timezone('US/Pacific')
 DARKSKY_TOKEN=os.environ.get('DARKSKY_TOKEN')
@@ -72,7 +72,7 @@ def get_first_day_this_month():
 def get_first_day_last_month():
     """Returns first day of last month in Pacific Daylight Time; for doc-testing purposes, change date below
     >>> get_first_day_last_month()
-    datetime.date(2018, 4, 1)"""
+    datetime.date(2018, 5, 1)"""
 
     today = get_today_local()
     first_this_month = get_first_day_this_month()
@@ -103,7 +103,8 @@ def get_first_last_year():
 def generate_date_range(start_date, num_days):
     """For generating range of dates to be passed into other functions
     >>> generate_date_range(datetime(2018, 1, 1), 5)
-    [datetime.datetime(2018, 1, 1, 0, 0), datetime.datetime(2018, 1, 2, 0, 0), datetime.datetime(2018, 1, 3, 0, 0), datetime.datetime(2018, 1, 4, 0, 0), datetime.datetime(2018, 1, 5, 0, 0)]
+    [datetime.datetime(2018, 1, 1, 0, 0), datetime.datetime(2018, 1, 2, 0, 0), datetime.datetime(2018, 1, 3, 0, 0), 
+    datetime.datetime(2018, 1, 4, 0, 0), datetime.datetime(2018, 1, 5, 0, 0)]
     """
     return [start_date + timedelta(days=x) for x in range(num_days)]
 
@@ -167,7 +168,7 @@ def get_intervals(timeframe):
 
     return (start_date, end_date, prior_year_start, prior_year_end, display_increment)
 
-def generate_y_axis_points(timeframe):
+def generate_x_axis_points(timeframe):
 
     if timeframe == 'last_seven_days':
 
