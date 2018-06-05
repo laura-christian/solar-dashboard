@@ -84,9 +84,12 @@ def get_kWh_data():
 def get_daylight_details():
     """Get details of solar path/daylight hours at site for today (local)"""
 
+    # Instantiating Astral object (for calculating position of sun and moon)
     a = Astral()
     a.solar_depression = 'civil'
 
+    # Instantiating an Astral location (hard-coded here since dealing with one site only, but
+    # easily scalable if site required login and site lat and long were tied to user profile)
     l = Location()
     l.latitude = 37.8195
     l.longitude = -122.2523
@@ -216,7 +219,7 @@ def get_cloudcover_data():
 
 if __name__ == "__main__":
 
-    # Necessary to invoke DebugToolbarExtension; note: no debug for demo
+    # Necessary to invoke DebugToolbarExtension; note to self: no debug for demo
     app.debug = True
     DebugToolbarExtension(app)
 
