@@ -67,7 +67,7 @@ function pushPullkWhData(results) {
   else if (!$('#compare-button').hasClass('active')) {
     kWhChart.data.datasets.pop();
     kWhChart.options.legend.display = false;
-    kWhChart.data.datasets[0].label = 'kWh';
+    kWhChart.data.datasets[0].label = '';
   }
   kWhChart.update(); 
 }
@@ -149,7 +149,11 @@ function refreshData() {
     }
 }
 
-$('.time-button').on('click', refreshData);
+$('.time-button').on('click', function(evt) {
+    $('.time-button').removeClass('active');
+    $(this).addClass('active')
+    refreshData();
+});
 
 $('#compare-button').on('click', function() {
   $('#compare-button').toggleClass('active');

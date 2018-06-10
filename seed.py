@@ -88,8 +88,8 @@ def load_solardata(file):
         db.session.commit()
 
 
-# if __name__ == "__main__":
-#     connect_to_db(app)
+if __name__ == "__main__":
+    connect_to_db(app)
 #     # db.drop_all()
 #     # db.create_all()
 
@@ -99,9 +99,9 @@ def load_solardata(file):
 #     # today = today.replace(hour=0, minute=0)
 #     # diff_in_days = today-start_date
 #     # date_list = [start_date + timedelta(days=x) for x in range(diff_in_days.days +1)]
-#     # load_cloudcover_data(date_list)
-#     files = ['Data_Extract_Manual_Compile3']
-#     for file in files:
-#         load_solardata(file)
+    # load_cloudcover_data(date_list)
+    files = ['Data_Extract_20160314-20180509', 'Data_Extract_20180501-20180521', 'Data_Extract_20180521-20180528', 'Data_Extract_20180528-20180607']
+    for file in files:
+        load_solardata(file)
     # update_cloudcover_data()
 

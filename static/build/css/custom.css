@@ -150,8 +150,8 @@ html , body{
     min-height: 100%;
     width: 70px;
     padding: 0;
-    z-index: 9999;
-    position: absolute
+    z-index: 1;
+    position: fixed
 }
 .nav-sm .container.body .col-md-3.left_col.menu_fixed {
     position: fixed;
@@ -342,7 +342,7 @@ html , body{
     min-height: 100%;
     width: 230px;
     padding: 0;
-    position: absolute;
+    position: fixed;
     display: -ms-flexbox;
     display: flex;
     z-index: 1
@@ -4190,7 +4190,31 @@ ul.notifications {
    .dataTables_length { float:none; }
 }
 
+.column {
+    float: left;
+    padding: 10px;
+}
 
+.left {
+  width: 70%;
+}
+
+.right {
+  width: 30%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+@media screen and (max-width: 767px) {
+    .column {
+        width: 100%;
+    }
+}
 
 
 /* CSS3 Checkbox */

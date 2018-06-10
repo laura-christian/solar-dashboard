@@ -39,7 +39,7 @@ def add_tests():
 def index():
     """Render homepage."""
 
-    # helper.update_cloudcover_data()
+    helper.update_cloudcover_data()
 
     return render_template("homepage.html")
 
@@ -61,7 +61,7 @@ def get_kWh_data():
     # Create subquery object to capture all kWh values b/w start and end dates
     subq = db.session.query(SolarOutput.dt_local, SolarOutput.kWh).\
         filter(SolarOutput.dt_local>=start_date, SolarOutput.dt_local<end_date).subquery()
-    # In turn perform group-by query on subquery to sum values for display_increment of time in which totals displayed
+    # In turn perform group-by query on subquery to sum values for increment of time in which totals displayed
     q = db.session.query(func.date_trunc(display_increment, subq.c.dt_local),func.sum(subq.c.kWh)).\
         group_by(func.date_trunc(display_increment, subq.c.dt_local)).having(func.sum(subq.c.kWh)>0).\
         order_by(func.date_trunc(display_increment,subq.c.dt_local)).all()
