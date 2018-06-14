@@ -39,7 +39,7 @@ def add_tests():
 def index():
     """Render homepage."""
 
-    helper.update_cloudcover_data()
+    # helper.update_cloudcover_data()
 
     return render_template("homepage.html")
 
@@ -220,7 +220,7 @@ def get_cloudcover_data():
 if __name__ == "__main__":
 
     # Necessary to invoke DebugToolbarExtension; note to self: no debug for demo
-    app.debug = True
+    app.debug = False
     DebugToolbarExtension(app)
 
     connect_to_db(app)
