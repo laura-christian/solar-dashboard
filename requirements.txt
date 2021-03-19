@@ -19,7 +19,7 @@ idna==2.6
 itsdangerous==0.24
 jasmine==3.1.0
 jasmine-core==3.1.0
-Jinja2==2.7.3
+Jinja2==2.11.3
 Mako==1.0.7
 MarkupSafe==0.23
 more-itertools==4.2.0
